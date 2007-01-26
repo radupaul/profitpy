@@ -1,0 +1,72 @@
+<ui version="4.0" >
+ <class>SessionTree</class>
+ <widget class="QWidget" name="SessionTree" >
+  <property name="geometry" >
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>400</width>
+    <height>300</height>
+   </rect>
+  </property>
+  <property name="windowTitle" >
+   <string>Form</string>
+  </property>
+  <layout class="QVBoxLayout" >
+   <property name="margin" >
+    <number>0</number>
+   </property>
+   <property name="spacing" >
+    <number>0</number>
+   </property>
+   <item>
+    <widget class="QTreeWidget" name="treeWidget" >
+     <property name="frameShape" >
+      <enum>QFrame::NoFrame</enum>
+     </property>
+     <property name="rootIsDecorated" >
+      <bool>true</bool>
+     </property>
+     <property name="animated" >
+      <bool>true</bool>
+     </property>
+     <property name="columnCount" >
+      <number>1</number>
+     </property>
+     <column>
+      <property name="text" >
+       <string>Object</string>
+      </property>
+     </column>
+     <item>
+      <property name="text" >
+       <string>Account</string>
+      </property>
+     </item>
+     <item>
+      <property name="text" >
+       <string>Broker</string>
+      </property>
+     </item>
+     <item>
+      <property name="text" >
+       <string>Tickers</string>
+      </property>
+      <item>
+       <property name="text" >
+        <string>One</string>
+       </property>
+       <item>
+        <property name="text" >
+         <string>Other</string>
+        </property>
+       </item>
+      </item>
+     </item>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>
