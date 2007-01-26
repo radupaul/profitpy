@@ -20,7 +20,7 @@ from profit.ui_mainwindow import Ui_MainWindow
 __about__ = {
     'date':'$Date$',
     'revision':'$Rev$',
-    'author':'$Author',
+    'author':'$Author$',
     'url':'$URL$',
     'id':'$Id$',
     }
