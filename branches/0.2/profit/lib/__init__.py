@@ -10,3 +10,5 @@ from PyQt4.QtCore import SIGNAL, SLOT
 
 class Signals:
     lastWindowClosed = SIGNAL('lastWindowClosed()')
+    sessionCreated = SIGNAL('sessionCreated(PyQt_PyObject)')
+    sessionItemClicked = itemDoubleClicked = SIGNAL('itemDoubleClicked(QTreeWidgetItem *,int)')

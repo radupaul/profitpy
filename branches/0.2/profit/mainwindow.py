@@ -4,14 +4,18 @@
 # Copyright 2007 Troy Melhase
 # Distributed under the terms of the GNU General Public License v2
 # Author: Troy Melhase <troy@gci.net>
+
 import os
+import signal
 import sys
 
 from PyQt4.QtCore import Qt, pyqtSignature
 from PyQt4.QtGui import QMainWindow, QFrame
 
 from profit.dock import Dock
+from profit.lib import Signals
 from profit.outputwidget import OutputWidget
+from profit.session import Session
 from profit.sessiontree import SessionTree
 from profit.shell import PythonShell
 from profit.ui_mainwindow import Ui_MainWindow
@@ -40,23 +44,30 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.stderrDock = Dock('Error', self, OutputWidget,
                                Qt.BottomDockWidgetArea)
         def makeShell(parent):
-            return PythonShell(parent,
-                               stdout=self.stdoutDock.widget(),
-                               stderr=self.stderrDock.widget())
+            out = self.stdoutDock.widget()
+            err = self.stderrDock.widget()
+            return PythonShell(parent, stdout=out, stderr=err)
+        
         self.shellDock = Dock('Shell', self, makeShell,
                               Qt.BottomDockWidgetArea)
         self.tabifyDockWidget(self.shellDock, self.stdoutDock)        
         self.tabifyDockWidget(self.stdoutDock, self.stderrDock)
+        self.createSession()
+        
+    def setWindowTitle(self, text):
+        text = '%s 0.2 (alpha) (r%s)' %(text,  __about__['revision'].split()[1])
+        QMainWindow.setWindowTitle(self, text)
 
+    def createSession(self):
+        session = Session()
+        self.emit(Signals.sessionCreated, session)
+        
     @pyqtSignature('bool')
     def on_actionNewSession_triggered(self, checked=False):
         pid = os.spawnlp(os.P_NOWAIT, *sys.argv)
         if not pid:
             # handle error
             pass
-        else:
-            print 'spawned pid %s' % (pid, )
-        
 
     @pyqtSignature('bool')
     def on_actionOpenSession_triggered(self, checked=False):
@@ -77,3 +88,11 @@ class MainWindow(QMainWindow, Ui_MainWindow):
     @pyqtSignature('bool')    
     def on_actionCloseSession_triggered(self, checked=False):
         self.close()
+
+    @pyqtSignature('bool')    
+    def on_actionQuit_triggered(self, checked=False):
+        try:
+            os.killpg(os.getpgrp(), signal.SIGQUIT)
+        except (AttributeError, ):
+            print >> sys.__stdout__, 'system does not support process groups'
+            self.close()
