@@ -1,6 +1,6 @@
 <ui version="4.0" >
- <class>ConnectionSettings</class>
- <widget class="QWidget" name="ConnectionSettings" >
+ <class>BrokerWidget</class>
+ <widget class="QWidget" name="BrokerWidget" >
   <property name="geometry" >
    <rect>
     <x>0</x>
@@ -20,7 +20,7 @@
     <number>6</number>
    </property>
    <item>
-    <widget class="QGroupBox" name="" >
+    <widget class="QGroupBox" name="groupBox" >
      <property name="title" >
       <string>Connection</string>
      </property>
@@ -163,7 +163,7 @@
     </widget>
    </item>
    <item>
-    <widget class="QGroupBox" name="" >
+    <widget class="QGroupBox" name="groupBox" >
      <property name="title" >
       <string>Commands</string>
      </property>
@@ -219,7 +219,7 @@
            </widget>
           </item>
           <item row="1" column="0" >
-           <widget class="QLabel" name="" >
+           <widget class="QLabel" name="label" >
             <property name="sizePolicy" >
              <sizepolicy>
               <hsizetype>1</hsizetype>
@@ -234,7 +234,7 @@
            </widget>
           </item>
           <item row="0" column="0" >
-           <widget class="QLabel" name="" >
+           <widget class="QLabel" name="label" >
             <property name="sizePolicy" >
              <sizepolicy>
               <hsizetype>1</hsizetype>

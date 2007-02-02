@@ -47,6 +47,11 @@ class Session(dict):
         connection = self.connection()
         return connection and connection.active()
 
+    def disconnect(self):
+        connection = self.connection()
+        if connection and connection.active():
+            connection.disconnect()
+        
     def connection(self):
         return self['broker']
     

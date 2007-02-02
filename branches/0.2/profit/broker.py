@@ -5,16 +5,20 @@
 # Distributed under the terms of the GNU General Public License v2
 # Author: Troy Melhase <troy@gci.net>
 
-from os import getpid
+from os import getpid, spawnlp, system, P_NOWAIT
+from os.path import abspath, dirname, join
 
 from PyQt4.QtCore import pyqtSignature
 from PyQt4.QtGui import QFrame, QMessageBox
-from profit.widgets.ui_connectionsettings import Ui_ConnectionSettings
+from profit.widgets.ui_brokerwidget import Ui_BrokerWidget
 
 host, port, client = 'localhost', '7496', str(getpid())
+keyHelperCommand = join(dirname(abspath(__file__)), 'bin', 'login_helper')
+brokerCommand = join(dirname(abspath(__file__)), 'bin', 'ib_tws')
 
 
-class ConnectionSettings(QFrame, Ui_ConnectionSettings):
+
+class BrokerWidget(QFrame, Ui_BrokerWidget):
     def __init__(self, session, parent=None):
         QFrame.__init__(self, parent)
         self.setupUi(self)
@@ -23,6 +27,12 @@ class ConnectionSettings(QFrame, Ui_ConnectionSettings):
         self.hostNameEdit.setText(host)
         self.portNumberEdit.setText(port)
         self.clientIdEdit.setText(client)
+        if not system('which xterm'):
+            commandFs = 'xterm -e %s'
+        else:
+            commandFs = '%s'
+        self.keyHelperCommandEdit.setText(commandFs % keyHelperCommand)
+        self.brokerCommandEdit.setText(commandFs % brokerCommand)
 
     @pyqtSignature('')
     def on_connectButton_clicked(self):
@@ -88,3 +98,17 @@ class ConnectionSettings(QFrame, Ui_ConnectionSettings):
         else:
             self.clientIdEdit.setText(str(value+1))
         
+
+    @pyqtSignature('')
+    def on_keyHelperCommandRunButton_clicked(self):
+        print 'running key helper command',
+        args = str(self.keyHelperCommandEdit.text()).split()
+        pid = spawnlp(P_NOWAIT, *args)
+        print 'pid', pid
+
+    @pyqtSignature('')
+    def on_brokerCommandRunButton_clicked(self):
+        print 'running broker command',
+        args = str(self.brokerCommandEdit.text()).split()
+        pid = spawnlp(P_NOWAIT, *args)
+        print 'pid', pid
