@@ -37,7 +37,7 @@ class Session(dict):
             builder = SessionBuilder()
         self.builder = builder
         self.listeners = []        
-        self['connection'] = None        
+        self['broker'] = None        
         self['account'] = builder.account()
         self['orders'] = builder.orders()
         self['strategy'] = builder.strategy()
@@ -48,7 +48,7 @@ class Session(dict):
         return connection and connection.active()
 
     def connection(self):
-        return self['connection']
+        return self['broker']
     
     def register(self, listener):
         self.listeners.append(listener)
@@ -57,7 +57,7 @@ class Session(dict):
             self.connectListener(connection, listener)
             
     def connectTWS(self, hostName, portNo, clientId):
-        self['connection'] = connection = tws_build_qt4(clientId)
+        self['broker'] = connection = tws_build_qt4(clientId)
         for listener in self.listeners:
             self.connectListener(connection, listener)
         connection.connect((hostName, portNo))

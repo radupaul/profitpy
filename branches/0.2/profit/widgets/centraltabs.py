@@ -16,7 +16,7 @@ class CentralTabs(QTabWidget):
         QTabWidget.__init__(self, parent)
         self.connect(self.window(), Signals.sessionItemClicked,
                      self.on_sessionItemClicked)
-        self.connectionTab = None
+        self.brokerTab = None
         self.session = None
         self.connect(self.window(), Signals.sessionCreated, self.on_sessionCreated)
 
@@ -37,8 +37,8 @@ class CentralTabs(QTabWidget):
         idx = self.addTab(TickerDisplay(self.session, self), item.text(0))
         self.setCurrentIndex(idx)
         
-    def on_sessionConnectionClicked(self, item):
-        if not self.connectionTab:
-            self.connectionTab = ConnectionSettings(self.session, self)
-            self.addTab(self.connectionTab, item.text(0))
-        self.setCurrentWidget(self.connectionTab)
+    def on_sessionBrokerClicked(self, item):
+        if not self.brokerTab:
+            self.brokerTab = ConnectionSettings(self.session, self)
+            self.addTab(self.brokerTab, item.text(0))
+        self.setCurrentWidget(self.brokerTab)
