@@ -13,7 +13,7 @@ import sys
 from PyQt4.QtCore import Qt, pyqtSignature
 from PyQt4.QtGui import QMainWindow, QFrame
 
-from profit import profitrc
+from profit import rc
 from profit.dock import Dock
 from profit.lib import Signals, Settings
 from profit.outputwidget import OutputWidget

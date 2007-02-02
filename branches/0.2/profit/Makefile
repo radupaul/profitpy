@@ -2,7 +2,7 @@ pyrcc = pyrcc4
 pyrccopt = -o
 images := `find ./images -name "*.png"|sort|cut -b 3-`
 rctmp = profit.rc
-rcfile = profitrc.py
+rcfile = rc.py
 
 
 .PHONY : all clean profitrc.py widgets
@@ -11,7 +11,7 @@ rcfile = profitrc.py
 all : widgets
 
 
-full : all profitrc.py
+full : all $(rcfile)
 
 
 clean :
