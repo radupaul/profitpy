@@ -6,7 +6,7 @@
 # Author: Troy Melhase <troy@gci.net>
 
 from os import getpid
-from os.path import abspath, dirname, join
+from os.path import abspath, dirname, join, pardir
 from subprocess import Popen, PIPE
 
 from PyQt4.QtCore import pyqtSignature
@@ -18,9 +18,10 @@ host, port, client = 'localhost', '7496', str(getpid())
 
 
 def commandStrings():
-    keyCmd = join(dirname(abspath(__file__)), 'bin', 'login_helper')
+    binDir = abspath(join(dirname(abspath(__file__)), pardir, 'bin'))
+    keyCmd =  join(binDir, 'login_helper')
     keyCmd += ' -v'
-    brokerCmd = join(dirname(abspath(__file__)), 'bin', 'ib_tws')
+    brokerCmd = join(binDir, 'ib_tws')
     hasXterm = bool(Popen(['which', 'xterm'], stdout=PIPE).communicate()[0].strip())
     if hasXterm:
         commandFs = 'xterm -title %s -e %s'
