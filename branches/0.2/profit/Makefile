@@ -5,7 +5,7 @@ rctmp = profit.rc
 rcfile = rc.py
 
 
-.PHONY : all clean profitrc.py widgets
+.PHONY : all clean $(rcfile) widgets
 
 
 all : widgets

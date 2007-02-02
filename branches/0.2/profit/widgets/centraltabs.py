@@ -8,7 +8,7 @@
 from PyQt4.QtGui import QTabWidget, QWidget
 
 from profit.lib import Signals
-from profit.widgets.brokerwidget import BrokerWidget
+from profit.widgets.brokerdisplay import BrokerWidget
 from profit.widgets.tickerdisplay import TickerDisplay
 
 
