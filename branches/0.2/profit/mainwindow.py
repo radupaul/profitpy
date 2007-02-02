@@ -7,14 +7,15 @@
 
 import os
 import signal
+import subprocess
 import sys
 
-from PyQt4.QtCore import QPoint, QSettings, QSize, QVariant, Qt, pyqtSignature
+from PyQt4.QtCore import Qt, pyqtSignature
 from PyQt4.QtGui import QMainWindow, QFrame
 
 from profit import profitrc
 from profit.dock import Dock
-from profit.lib import Signals, Keys
+from profit.lib import Signals, Settings
 from profit.outputwidget import OutputWidget
 from profit.session import Session
 from profit.sessiontree import SessionTree
@@ -67,7 +68,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         
     @pyqtSignature('bool')
     def on_actionNewSession_triggered(self, checked=False):
-        pid = os.spawnlp(os.P_NOWAIT, *sys.argv)
+        pid = subprocess.Popen(sys.argv).pid
         if not pid:
             # handle error
             pass
@@ -105,20 +106,21 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         event.accept()
 
     def readSettings(self):
-        settings = QSettings(Keys.org, Keys.app)
-        settings.beginGroup(Keys.main)
-        defSize = QVariant(QSize(400, 400))
-        defPos = QVariant(QPoint(200, 200))
-        self.resize(settings.value(Keys.size, defSize).toSize())
-        self.move(settings.value(Keys.pos, defPos).toPoint())
-        if settings.value(Keys.maximized, QVariant(False)).toBool():
-            self.showMaximized()
+        settings = Settings()
+        settings.beginGroup(settings.keys.main)
+        size = settings.value(settings.keys.size, settings.defSize).toSize()
+        pos = settings.value(settings.keys.pos, settings.defPos).toPoint()
+        maxed = settings.value(settings.keys.maximized, False).toBool()
         settings.endGroup()    
+        self.resize(size)        
+        self.move(pos)
+        if maxed:
+            self.showMaximized()
 
     def writeSettings(self):
-        settings = QSettings(Keys.org, Keys.app)
-        settings.beginGroup(Keys.main)
-        settings.setValue(Keys.size, QVariant(self.size()))
-        settings.setValue(Keys.pos, QVariant(self.pos()))
-        settings.setValue(Keys.maximized, QVariant(self.isMaximized()))
+        settings = Settings()
+        settings.beginGroup(settings.keys.main)
+        settings.setValue(settings.keys.size, self.size())
+        settings.setValue(settings.keys.pos, self.pos())
+        settings.setValue(settings.keys.maximized, self.isMaximized())
         settings.endGroup()
