@@ -9,7 +9,7 @@ import sys
 from PyQt4.QtGui import QTreeWidget, QTreeWidgetItem, QWidget
 
 from profit.lib import Signals
-from profit.ui_sessiontree import Ui_SessionTree
+from profit.widgets.ui_sessiontree import Ui_SessionTree
 
 
 class SessionTree(QWidget, Ui_SessionTree):

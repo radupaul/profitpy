@@ -9,7 +9,7 @@ from os import getpid
 
 from PyQt4.QtCore import pyqtSignature
 from PyQt4.QtGui import QFrame, QMessageBox
-from profit.ui_connectionsettings import Ui_ConnectionSettings
+from profit.widgets.ui_connectionsettings import Ui_ConnectionSettings
 
 host, port, client = 'localhost', '7496', str(getpid())
 

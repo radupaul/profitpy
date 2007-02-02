@@ -7,12 +7,12 @@
 
 import sys
 from PyQt4.QtCore import Qt
-from PyQt4.QtGui import QBrush, QColor, QFrame, QTableWidgetItem
+from PyQt4.QtGui import QBrush, QColor, QFrame, QIcon, QTableWidgetItem
 
 from ib.client import message
 from ib.types import TickType
 from profit.lib import Signals
-from profit.ui_tickerdisplay import Ui_TickerDisplay
+from profit.widgets.ui_tickerdisplay import Ui_TickerDisplay
 
 
 labels = [
@@ -50,11 +50,9 @@ class TickerDisplay(QFrame, Ui_TickerDisplay):
         table.setSortingEnabled(False)        
         table.setColumnCount(len(labels))
         table.setHorizontalHeaderLabels(labels)
-        #table.setSelectionBehavior(table.SelectRows)
         table.setSelectionMode(table.SingleSelection)
         table.verticalHeader().hide()
-
-        
+            
     def readMessageTypes(self):
         return (message.TickPrice, message.TickSize, )
 
@@ -70,11 +68,13 @@ class TickerDisplay(QFrame, Ui_TickerDisplay):
             row = table.rowCount()
             table.setRowCount(row+1)
             items = [TickerTableItem() for i in range(columnCount)]
-            items[0].setText(sym)
+            items[0].setSymbol(sym)
             for col, item in enumerate(items):
                 item.setFlags(item.flags() & ~Qt.ItemIsEditable)
                 table.setItem(row, col, item)
             rows[tid] = items
+        for i in range(len(labels)):
+            table.resizeColumnToContents(i)
 
     def __call__(self, message):
         tid = message.tickerId
@@ -89,10 +89,10 @@ class TickerDisplay(QFrame, Ui_TickerDisplay):
             if index is not None:
                 items[index].setValue(message.value)
             table.setUpdatesEnabled(True)
-        
 
     def table(self):
         return self.tickerTable
+
 
 class TickerTableItem(QTableWidgetItem):
     red = QBrush(QColor('red'))
@@ -114,3 +114,8 @@ class TickerTableItem(QTableWidgetItem):
         self.value = value
         self.setText(str(value))
     
+    def setSymbol(self, value):
+        icon = QIcon(':images/tickers/%s.png' % (value.lower(), ))
+        if not icon.isNull():
+            self.setIcon(icon)
+        self.setText(value)

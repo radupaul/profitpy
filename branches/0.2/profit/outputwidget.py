@@ -6,7 +6,7 @@
 # Author: Troy Melhase <troy@gci.net>
 
 from PyQt4.QtGui import QWidget
-from profit.ui_outputwidget import Ui_OutputWidget
+from profit.widgets.ui_outputwidget import Ui_OutputWidget
 
 class OutputWidget(QWidget, Ui_OutputWidget):
     def __init__(self, parent=None):

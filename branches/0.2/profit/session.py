@@ -22,7 +22,7 @@ class SessionBuilder(object):
         return None
 
     def tickers(self):
-        return {'AAPL':100, 'INTC':101, 'GOOG':102}
+        return {'AAPL':100, 'EBAY':101, 'NVDA':102}
 
     def contract(self, symbol):
         return Contract(symbol=symbol,

@@ -12,13 +12,14 @@ import sys
 from PyQt4.QtCore import QPoint, QSettings, QSize, QVariant, Qt, pyqtSignature
 from PyQt4.QtGui import QMainWindow, QFrame
 
+from profit import profitrc
 from profit.dock import Dock
 from profit.lib import Signals, Keys
 from profit.outputwidget import OutputWidget
 from profit.session import Session
 from profit.sessiontree import SessionTree
 from profit.shell import PythonShell
-from profit.ui_mainwindow import Ui_MainWindow
+from profit.widgets.ui_mainwindow import Ui_MainWindow
 
 
 __about__ = {
