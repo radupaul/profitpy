@@ -27,3 +27,7 @@ class OutputWidget(QWidget, Ui_OutputWidget):
 
     def setCurrentCharFormat(self, format):
         return self.editor().setCurrentCharFormat(format)
+
+    def flush(self):
+        pass
+    

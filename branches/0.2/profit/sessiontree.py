@@ -29,7 +29,7 @@ class SessionTree(QWidget, Ui_SessionTree):
         self.session = session
         widget = self.tree()
         widget.clear()
-        for key in session:
+        for key in sorted(session):
             item = QTreeWidgetItem(widget)
             item.setText(0, key)
             value = session[key]

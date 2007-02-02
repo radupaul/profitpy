@@ -48,20 +48,6 @@
        <property name="spacing" >
         <number>6</number>
        </property>
-       <item row="1" column="1" >
-        <widget class="QLineEdit" name="portnumEdit" >
-         <property name="alignment" >
-          <set>Qt::AlignRight</set>
-         </property>
-        </widget>
-       </item>
-       <item row="0" column="1" >
-        <widget class="QLineEdit" name="hostnameEdit" >
-         <property name="alignment" >
-          <set>Qt::AlignRight</set>
-         </property>
-        </widget>
-       </item>
        <item row="0" column="0" >
         <widget class="QLabel" name="label" >
          <property name="text" >
@@ -69,10 +55,38 @@
          </property>
         </widget>
        </item>
+       <item row="0" column="1" >
+        <widget class="QLineEdit" name="hostNameEdit" >
+         <property name="alignment" >
+          <set>Qt::AlignRight</set>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="1" >
+        <widget class="QLineEdit" name="portNumberEdit" >
+         <property name="alignment" >
+          <set>Qt::AlignRight</set>
+         </property>
+        </widget>
+       </item>
        <item row="1" column="0" >
         <widget class="QLabel" name="label" >
          <property name="text" >
-          <string>Port</string>
+          <string>Port:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="2" column="1" >
+        <widget class="QLineEdit" name="clientIdEdit" >
+         <property name="alignment" >
+          <set>Qt::AlignRight</set>
+         </property>
+        </widget>
+       </item>
+       <item row="2" column="0" >
+        <widget class="QLabel" name="label" >
+         <property name="text" >
+          <string>Client ID:</string>
          </property>
         </widget>
        </item>
@@ -106,8 +120,15 @@
        <property name="text" >
         <string>Connect</string>
        </property>
-       <property name="checkable" >
-        <bool>true</bool>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="disconnectButton" >
+       <property name="enabled" >
+        <bool>false</bool>
+       </property>
+       <property name="text" >
+        <string>Disconnect</string>
        </property>
       </widget>
      </item>

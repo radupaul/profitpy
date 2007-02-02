@@ -9,11 +9,11 @@ import os
 import signal
 import sys
 
-from PyQt4.QtCore import Qt, pyqtSignature
+from PyQt4.QtCore import QPoint, QSettings, QSize, QVariant, Qt, pyqtSignature
 from PyQt4.QtGui import QMainWindow, QFrame
 
 from profit.dock import Dock
-from profit.lib import Signals
+from profit.lib import Signals, Keys
 from profit.outputwidget import OutputWidget
 from profit.session import Session
 from profit.sessiontree import SessionTree
@@ -53,6 +53,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.tabifyDockWidget(self.shellDock, self.stdoutDock)        
         self.tabifyDockWidget(self.stdoutDock, self.stderrDock)
         self.createSession()
+        self.readSettings()
+
         
     def setWindowTitle(self, text):
         text = '%s 0.2 (alpha) (r%s)' %(text,  __about__['revision'].split()[1])
@@ -96,3 +98,26 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         except (AttributeError, ):
             print >> sys.__stdout__, 'system does not support process groups'
             self.close()
+
+    def closeEvent(self, event):
+        self.writeSettings()
+        event.accept()
+
+    def readSettings(self):
+        settings = QSettings(Keys.org, Keys.app)
+        settings.beginGroup(Keys.main)
+        defSize = QVariant(QSize(400, 400))
+        defPos = QVariant(QPoint(200, 200))
+        self.resize(settings.value(Keys.size, defSize).toSize())
+        self.move(settings.value(Keys.pos, defPos).toPoint())
+        if settings.value(Keys.maximized, QVariant(False)).toBool():
+            self.showMaximized()
+        settings.endGroup()    
+
+    def writeSettings(self):
+        settings = QSettings(Keys.org, Keys.app)
+        settings.beginGroup(Keys.main)
+        settings.setValue(Keys.size, QVariant(self.size()))
+        settings.setValue(Keys.pos, QVariant(self.pos()))
+        settings.setValue(Keys.maximized, QVariant(self.isMaximized()))
+        settings.endGroup()

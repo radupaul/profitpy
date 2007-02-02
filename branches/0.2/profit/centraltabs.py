@@ -17,7 +17,12 @@ class CentralTabs(QTabWidget):
         self.connect(self.window(), Signals.sessionItemClicked,
                      self.on_sessionItemClicked)
         self.connectionTab = None
+        self.session = None
+        self.connect(self.window(), Signals.sessionCreated, self.on_sessionCreated)
 
+    def on_sessionCreated(self, session):
+        self.session = session
+    
     def on_sessionItemClicked(self, item, col):
         value = str(item.text(0))
         call = getattr(self, 'on_session%sClicked' % value.capitalize(), None)
@@ -29,11 +34,11 @@ class CentralTabs(QTabWidget):
         pass
 
     def on_sessionTickersClicked(self, item):
-        idx = self.addTab(TickerDisplay(self), item.text(0))
+        idx = self.addTab(TickerDisplay(self.session, self), item.text(0))
         self.setCurrentIndex(idx)
         
     def on_sessionConnectionClicked(self, item):
         if not self.connectionTab:
-            self.connectionTab = ConnectionSettings(self)
+            self.connectionTab = ConnectionSettings(self.session, self)
             self.addTab(self.connectionTab, item.text(0))
         self.setCurrentWidget(self.connectionTab)

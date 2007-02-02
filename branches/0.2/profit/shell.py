@@ -107,6 +107,9 @@ class PythonShell(QTextEdit):
         self.setLineWrapMode(self.NoWrap)
         self.setUndoRedoEnabled(False) ## big performance hit otherwise
 
+    def flush(self):
+        pass
+    
     def writeBanner(self):
         self.setText('')
         self.write(str.join('', self.introText + (self.ps1, )))

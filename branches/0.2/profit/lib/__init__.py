@@ -12,3 +12,13 @@ class Signals:
     lastWindowClosed = SIGNAL('lastWindowClosed()')
     sessionCreated = SIGNAL('sessionCreated(PyQt_PyObject)')
     sessionItemClicked = itemDoubleClicked = SIGNAL('itemDoubleClicked(QTreeWidgetItem *,int)')
+
+
+class Keys:
+    main = 'MainWindow'
+    org = 'ProfitPy'
+    app = 'ProfitDevice'
+    size = 'size'
+    pos = 'pos'
+    maximized = 'maximized'
+    
