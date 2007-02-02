@@ -29,7 +29,7 @@ def commandStrings():
     return keyCmd, brokerCmd
 
 
-class BrokerWidget(QFrame, Ui_BrokerWidget):
+class BrokerDisplay(QFrame, Ui_BrokerWidget):
     def __init__(self, session, parent=None):
         QFrame.__init__(self, parent)
         self.setupUi(self)

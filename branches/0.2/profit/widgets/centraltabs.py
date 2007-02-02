@@ -8,7 +8,7 @@
 from PyQt4.QtGui import QTabWidget, QWidget
 
 from profit.lib import Signals
-from profit.widgets.brokerdisplay import BrokerWidget
+from profit.widgets.brokerdisplay import BrokerDisplay
 from profit.widgets.tickerdisplay import TickerDisplay
 
 
@@ -40,6 +40,6 @@ class CentralTabs(QTabWidget):
         
     def on_sessionBrokerClicked(self, item):
         if not self.brokerTab:
-            self.brokerTab = BrokerWidget(self.session, self)
+            self.brokerTab = BrokerDisplay(self.session, self)
             self.addTab(self.brokerTab, item.text(0))
         self.setCurrentWidget(self.brokerTab)

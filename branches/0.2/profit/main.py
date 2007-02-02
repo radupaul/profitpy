@@ -17,7 +17,7 @@ from profit import rc
 from profit.lib import Signals, Settings
 from profit.session import Session
 from profit.widgets.dock import Dock
-from profit.widgets.outputwidget import OutputWidget
+from profit.widgets.output import OutputWidget
 from profit.widgets.sessiontree import SessionTree
 from profit.widgets.shell import PythonShell
 from profit.widgets.ui_mainwindow import Ui_MainWindow
