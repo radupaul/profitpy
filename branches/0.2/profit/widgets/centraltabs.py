@@ -7,9 +7,10 @@
 
 from PyQt4.QtGui import QTabWidget, QWidget
 
-from profit.broker import BrokerWidget
 from profit.lib import Signals
-from profit.tickerdisplay import TickerDisplay
+from profit.widgets.brokerwidget import BrokerWidget
+from profit.widgets.tickerdisplay import TickerDisplay
+
 
 class CentralTabs(QTabWidget):
     def __init__(self, parent=None):
