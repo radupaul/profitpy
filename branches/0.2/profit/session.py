@@ -10,18 +10,49 @@ import sys
 from ib.client import build_qt4 as tws_build_qt4
 from ib.types import Contract
 
+
+class SessionBuilder(object):
+    def account(self):
+        return None
+
+    def orders(self):
+        return None
+
+    def strategy(self):
+        return None
+
+    def tickers(self):
+        return {'AAPL':100, 'INTC':101, 'GOOG':102}
+
+    def contract(self, symbol):
+        return Contract(symbol=symbol,
+                        secType='STK',
+                        exchange='SMART',
+                        currency='USD')
+
+
 class Session(dict):
-    def __init__(self):
+    def __init__(self, builder=None):
+        if builder is None:
+            builder = SessionBuilder()
+        self.builder = builder
         self.listeners = []        
-        self['account'] = self.buildAccount()
-        self['connection'] = self.buildConnection()
-        self['tickers'] = self.buildTickers()
-        self['orders'] = self.buildOrders()
-        self['strategy'] = self.buildStrategy()
-        
+        self['connection'] = None        
+        self['account'] = builder.account()
+        self['orders'] = builder.orders()
+        self['strategy'] = builder.strategy()
+        self['tickers'] = builder.tickers()
+
+    def active(self):
+        connection = self.connection()
+        return connection and connection.active()
+
+    def connection(self):
+        return self['connection']
+    
     def register(self, listener):
         self.listeners.append(listener)
-        connection = self['connection']
+        connection = self.connection()
         if connection and connection.active():
             self.connectListener(connection, listener)
             
@@ -31,36 +62,18 @@ class Session(dict):
             self.connectListener(connection, listener)
         connection.connect((hostName, portNo))
         return self
-
-    def active(self):
-        return self['connection'] and self['connection'].active()
     
     def requestTickers(self):
-        connection = self['connection']
+        connection = self.connection()
         for sym, tid in self['tickers'].items():
-            contract = Contract(symbol=sym, secType='STK', exchange='SMART',
-                                currency='USD')
+            contract = self.builder.contract(sym)
             connection.reqMktData(tid, contract)
             connection.reqMktDepth(tid, contract)
 
-    def connectListener(self, connection, listener):
+    @staticmethod
+    def connectListener(connection, listener):
         for message in listener.readMessageTypes():
             connection.register(message, listener)
         for message in listener.writeMessageTypes():
             connection.register(message, listener, which=connection.WRITER)
 
-    def buildAccount(self):
-        return None
-
-    def buildConnection(self):
-        return None
-    
-    def buildTickers(self):
-        return {'AAPL':100, 'INTC':101, 'GOOG':102}
-
-    def buildOrders(self):
-        return None
-
-    def buildStrategy(self):
-        return None
-    
