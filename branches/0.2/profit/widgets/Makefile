@@ -3,6 +3,8 @@ pyuicopt = -x -o
 objects := $(addsuffix .py, $(basename $(wildcard *.ui)))
 
 
+.PHONY : all clean $(rcout)
+
 all : $(objects)
 
 

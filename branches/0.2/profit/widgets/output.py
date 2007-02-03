@@ -1,9 +1,8 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-# Copyright 2007 Troy Melhase
+# Copyright 2007 Troy Melhase <troy@gci.net>
 # Distributed under the terms of the GNU General Public License v2
-# Author: Troy Melhase <troy@gci.net>
 
 from PyQt4.QtGui import QWidget
 from profit.widgets.ui_outputwidget import Ui_OutputWidget
