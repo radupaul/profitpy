@@ -14,18 +14,16 @@ class Signals:
     sessionItemClicked = itemDoubleClicked = SIGNAL('itemDoubleClicked(QTreeWidgetItem *,int)')
 
 
-class SettingKeys:
-    main = 'MainWindow'
-    session = 'Session'    
-    org = 'ProfitPy'
-    app = 'ProfitDevice'
-    size = 'size'
-    pos = 'pos'
-    maximized = 'maximized'
-
-
 class Settings(QSettings):
-    keys = SettingKeys()
+    class keys:
+        main = 'MainWindow'
+        session = 'Session'    
+        org = 'ProfitPy'
+        app = 'ProfitDevice'
+        size = 'Size'
+        pos = 'Position'
+        maximized = 'Maximized'
+    
     defSize = QSize(400, 400)
     defPos = QPoint(200, 200)
     

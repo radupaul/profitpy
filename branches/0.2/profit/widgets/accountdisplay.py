@@ -1,24 +1,13 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-# Copyright 2007 Troy Melhase
+# Copyright 2007 Troy Melhase <troy@gci.net>
 # Distributed under the terms of the GNU General Public License v2
-# Author: Troy Melhase <troy@gci.net>
 
-from PyQt4.QtCore import Qt, SIGNAL
-from PyQt4.QtGui import QFrame, QIcon, QTableWidgetItem
+from PyQt4.QtGui import QFrame
 
 from profit.lib import ValueTableItem
 from profit.widgets.ui_accountdisplay import Ui_AccountDisplay
-
-
-labels = [
-    'Item',
-    'Value',
-    'Currency',
-    'Account',
-    'Color',
-    ]
 
 
 class AccountDisplay(QFrame, Ui_AccountDisplay):
@@ -26,21 +15,13 @@ class AccountDisplay(QFrame, Ui_AccountDisplay):
         QFrame.__init__(self, parent)
         self.setupUi(self)
         self.accountItems = {}
-        self.setupAccountTable()        
+        self.accountValuesTable.verticalHeader().hide()        
         session.register('AccountValue', self.on_accountValue)
 
-    def setupAccountTable(self):
-        table = self.accountTable()
-        table.setColumnCount(len(labels))
-        table.setHorizontalHeaderLabels(labels)
-        table.setSelectionMode(table.SingleSelection)
-        table.setSelectionBehavior(table.SelectItems)
-        table.verticalHeader().hide()
-        
     def on_accountValue(self, message):
         key, value, currency, accountName = \
              message.key, message.value, message.currency, message.accountName
-        table = self.accountTable()
+        table = self.accountValuesTable
         columnCount = table.columnCount()
         table.setUpdatesEnabled(False)
         try:
@@ -60,10 +41,8 @@ class AccountDisplay(QFrame, Ui_AccountDisplay):
         for i in range(columnCount):
             table.resizeColumnToContents(i)
         table.setUpdatesEnabled(True)
-        
-    def accountTable(self):
-        return self.accountValuesTable
 
 
 class AccountTableItem(ValueTableItem):
     pass
+        

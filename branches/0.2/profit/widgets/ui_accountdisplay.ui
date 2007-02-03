@@ -20,15 +20,53 @@
     <number>6</number>
    </property>
    <item>
-    <widget class="QSplitter" name="" >
+    <widget class="QSplitter" name="splitter" >
      <property name="orientation" >
       <enum>Qt::Vertical</enum>
      </property>
-     <widget class="QSplitter" name="" >
+     <widget class="QSplitter" name="splitter" >
       <property name="orientation" >
        <enum>Qt::Horizontal</enum>
       </property>
-      <widget class="QTableWidget" name="accountValuesTable" />
+      <widget class="QTableWidget" name="accountValuesTable" >
+       <property name="alternatingRowColors" >
+        <bool>true</bool>
+       </property>
+       <property name="selectionMode" >
+        <enum>QAbstractItemView::SingleSelection</enum>
+       </property>
+       <property name="selectionBehavior" >
+        <enum>QAbstractItemView::SelectRows</enum>
+       </property>
+       <property name="gridStyle" >
+        <enum>Qt::DotLine</enum>
+       </property>
+       <column>
+        <property name="text" >
+         <string>Item</string>
+        </property>
+       </column>
+       <column>
+        <property name="text" >
+         <string>Value</string>
+        </property>
+       </column>
+       <column>
+        <property name="text" >
+         <string>Currency</string>
+        </property>
+       </column>
+       <column>
+        <property name="text" >
+         <string>Account</string>
+        </property>
+       </column>
+       <column>
+        <property name="text" >
+         <string>Plot</string>
+        </property>
+       </column>
+      </widget>
       <widget class="QFrame" name="plotFrame" >
        <property name="frameShape" >
         <enum>QFrame::StyledPanel</enum>
@@ -38,7 +76,14 @@
        </property>
       </widget>
      </widget>
-     <widget class="QTableWidget" name="positionTable" />
+     <widget class="QTableWidget" name="positionTable" >
+      <property name="gridStyle" >
+       <enum>Qt::DotLine</enum>
+      </property>
+      <property name="sortingEnabled" >
+       <bool>true</bool>
+      </property>
+     </widget>
     </widget>
    </item>
   </layout>
