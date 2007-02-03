@@ -7,6 +7,7 @@
 
 import sys
 
+from PyQt4.QtCore import SIGNAL
 from ib.client import build_qt4 as tws_build_qt4
 from ib.types import Contract
 
@@ -36,7 +37,7 @@ class Session(dict):
         if builder is None:
             builder = SessionBuilder()
         self.builder = builder
-        self.listeners = []        
+        self.receivers = []
         self['broker'] = None        
         self['account'] = builder.account()
         self['orders'] = builder.orders()
@@ -55,16 +56,17 @@ class Session(dict):
     def connection(self):
         return self['broker']
     
-    def register(self, listener):
-        self.listeners.append(listener)
+    def register(self, key, call):
+        self.receivers.append((key,call))
         connection = self.connection()
         if connection and connection.active():
-            self.connectListener(connection, listener)
+            self.readerConnect(key, call)
+
             
     def connectTWS(self, hostName, portNo, clientId):
         self['broker'] = connection = tws_build_qt4(clientId)
-        for listener in self.listeners:
-            self.connectListener(connection, listener)
+        for key, call in self.receivers:
+            self.readerConnect(key, call)
         connection.connect((hostName, portNo))
         return self
     
@@ -75,10 +77,11 @@ class Session(dict):
             connection.reqMktData(tid, contract)
             connection.reqMktDepth(tid, contract)
 
-    @staticmethod
-    def connectListener(connection, listener):
-        for message in listener.readMessageTypes():
-            connection.register(message, listener)
-        for message in listener.writeMessageTypes():
-            connection.register(message, listener, which=connection.WRITER)
+    def requestAccount(self):
+        connection = self.connection()
+        connection.reqAccountUpdates()
 
+
+    def readerConnect(self, key, call):
+        reader = self.connection().reader
+        reader.connect(reader, SIGNAL(key), call)

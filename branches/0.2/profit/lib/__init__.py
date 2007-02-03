@@ -5,8 +5,8 @@
 # Distributed under the terms of the GNU General Public License v2
 # Author: Troy Melhase <troy@gci.net>
 
-from PyQt4.QtCore import QPoint, QSettings, QSize, QVariant, SIGNAL, SLOT
-
+from PyQt4.QtCore import QPoint, QSettings, QSize, QVariant, Qt, SIGNAL, SLOT
+from PyQt4.QtGui import QBrush, QColor, QTableWidgetItem
 
 class Signals:
     lastWindowClosed = SIGNAL('lastWindowClosed()')
@@ -59,3 +59,35 @@ def importItem(name):
     modname, itemname = names[0:-1], names[-1]
     mod = importName(str.join('.', modname))
     return getattr(mod, itemname)
+
+
+class ValueTableItem(QTableWidgetItem):
+    red = QBrush(QColor('red'))
+    green = QBrush(QColor('green'))
+    blue = QBrush(QColor('blue'))
+    
+    def __init__(self):
+        QTableWidgetItem.__init__(self, self.UserType)
+        self.setFlags(self.flags() & ~Qt.ItemIsEditable)        
+        self.value = None
+
+    def setValue(self, value):
+        try:
+            value = float(value)
+        except (ValueError, ):
+            self.setText(value)
+            return
+        current = self.value
+        if current is None:
+            self.value = value
+            self.setText(str(value))
+            return
+        if value < current:
+            self.setForeground(self.red)
+        elif value > current:
+            self.setForeground(self.green)                
+        else:
+            self.setForeground(self.blue)
+        self.value = value
+        self.setText(str(value))
+    

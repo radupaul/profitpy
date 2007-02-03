@@ -64,6 +64,7 @@ class BrokerDisplay(QFrame, Ui_BrokerWidget):
             self.setEnabledButtons(False, True)
             try:
                 connection.requestTickers()
+                connection.requestAccount()
             except (Exception, ), ex:
                 print ex
                 raise

@@ -6,12 +6,13 @@
 # Author: Troy Melhase <troy@gci.net>
 
 import sys
-from PyQt4.QtCore import Qt
-from PyQt4.QtGui import QBrush, QColor, QFrame, QIcon, QTableWidgetItem
+#from PyQt4.QtCore import Qt
+from PyQt4.QtGui import QFrame, QIcon, QTableWidgetItem
 
 from ib.client import message
 from ib.types import TickType
-from profit.lib import Signals
+
+from profit.lib import Signals, ValueTableItem
 from profit.widgets.ui_tickerdisplay import Ui_TickerDisplay
 
 
@@ -27,6 +28,7 @@ labels = [
     'Last Price',
     ]
 
+
 labelTypes = {
     TickType.ASK_SIZE : labels.index('Ask Size'),
     TickType.ASK : labels.index('Ask Price'),
@@ -36,14 +38,16 @@ labelTypes = {
     TickType.LAST : labels.index('Last Price'),
     }
 
+
 class TickerDisplay(QFrame, Ui_TickerDisplay):
     def __init__(self, session, parent=None):
         QFrame.__init__(self, parent)
         self.setupUi(self)
-        self.session = session
-        session.register(self)
+        self.tickerItems = {}
+        self.tickers = session['tickers']        
         self.setupTable()
-        self.setupTickers()
+        session.register('TickPrice', self.on_tickerPriceSize)
+        session.register('TickSize', self.on_tickerPriceSize)
         
     def setupTable(self):
         table = self.table()
@@ -52,68 +56,40 @@ class TickerDisplay(QFrame, Ui_TickerDisplay):
         table.setHorizontalHeaderLabels(labels)
         table.setSelectionMode(table.SingleSelection)
         table.verticalHeader().hide()
-            
-    def readMessageTypes(self):
-        return (message.TickPrice, message.TickSize, )
-
-    def writeMessageTypes(self):
-        return ()
-
-    def setupTickers(self):
-        self.rows = rows = {}
-        table = self.table()
-        tickers = self.session['tickers']
-        columnCount = table.columnCount()
-        for sym, tid in sorted(tickers.items()):
-            row = table.rowCount()
-            table.setRowCount(row+1)
-            items = [TickerTableItem() for i in range(columnCount)]
-            items[0].setSymbol(sym)
-            for col, item in enumerate(items):
-                item.setFlags(item.flags() & ~Qt.ItemIsEditable)
-                table.setItem(row, col, item)
-            rows[tid] = items
         for i in range(len(labels)):
             table.resizeColumnToContents(i)
 
-    def __call__(self, message):
+    def on_tickerPriceSize(self, message):
         tid = message.tickerId
+        table = self.table()        
+        table.setUpdatesEnabled(False)
+        
         try:
-            items = self.rows[tid]
+            items = self.tickerItems[tid]
         except (KeyError, ):
-            print >> sys.__stdout__, 'key error for %s' % (tid, )
-        else:
-            table = self.table()
-            table.setUpdatesEnabled(False)
-            index = labelTypes.get(message.field, None)
-            if index is not None:
-                items[index].setValue(message.value)
-            table.setUpdatesEnabled(True)
+            sym = dict([(b,a) for a, b in self.tickers.items()])[tid]
+            columnCount = table.columnCount()
+            row = table.rowCount()
+            table.insertRow(row)
+            items = self.tickerItems[tid] = \
+                    [TickerTableItem() for i in range(columnCount)]
+            items[0].setSymbol(sym)
+            for col, item in enumerate(items):
+                table.setItem(row, col, item)
+            table.sortItems(0)
+            table.resizeColumnToContents(0)
+
+        index = labelTypes.get(message.field, None)
+        if index is not None:
+            items[index].setValue(message.value)
+            table.resizeColumnToContents(index)
+        table.setUpdatesEnabled(True)
 
     def table(self):
         return self.tickerTable
 
 
-class TickerTableItem(QTableWidgetItem):
-    red = QBrush(QColor('red'))
-    green = QBrush(QColor('green'))
-    blue = QBrush(QColor('blue'))
-    
-    def __init__(self):
-        QTableWidgetItem.__init__(self, self.UserType)
-        self.value = 0
-        
-    def setValue(self, value):
-        current = self.value
-        if value < current:
-            self.setForeground(self.red)
-        elif value > current:
-            self.setForeground(self.green)                
-        else:
-            self.setForeground(self.blue)
-        self.value = value
-        self.setText(str(value))
-    
+class TickerTableItem(ValueTableItem):
     def setSymbol(self, value):
         icon = QIcon(':images/tickers/%s.png' % (value.lower(), ))
         if not icon.isNull():

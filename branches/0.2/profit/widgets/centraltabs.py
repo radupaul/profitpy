@@ -8,6 +8,7 @@
 from PyQt4.QtGui import QTabWidget, QWidget
 
 from profit.lib import Signals
+from profit.widgets.accountdisplay import AccountDisplay
 from profit.widgets.brokerdisplay import BrokerDisplay
 from profit.widgets.tickerdisplay import TickerDisplay
 
@@ -32,7 +33,8 @@ class CentralTabs(QTabWidget):
         
 
     def on_sessionAccountClicked(self, item):
-        pass
+        idx = self.addTab(AccountDisplay(self.session, self), item.text(0))
+        self.setCurrentIndex(idx)
 
     def on_sessionTickersClicked(self, item):
         idx = self.addTab(TickerDisplay(self.session, self), item.text(0))
