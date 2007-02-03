@@ -13,9 +13,10 @@ import sys
 from PyQt4.QtCore import Qt, pyqtSignature
 from PyQt4.QtGui import QMainWindow, QFrame
 
-from profit import rc
+
 from profit.lib import Signals, Settings
 from profit.session import Session
+from profit.widgets import profit_rc
 from profit.widgets.dock import Dock
 from profit.widgets.output import OutputWidget
 from profit.widgets.sessiontree import SessionTree

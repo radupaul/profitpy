@@ -2,7 +2,7 @@ pyrcc = pyrcc4
 pyrccopt = -o
 images := `find ./images -name "*.png"|sort|cut -b 3-`
 rcsrc = profit.qrc
-rcout = rc.py
+rcout = profit_rc.py
 
 pyuic = pyuic4
 pyuicopt = -x -o

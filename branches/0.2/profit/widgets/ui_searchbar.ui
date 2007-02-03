@@ -24,6 +24,9 @@
      <property name="text" >
       <string/>
      </property>
+     <property name="icon" >
+      <iconset resource="profit.qrc" >:/images/buttons/locationbar_erase.png</iconset>
+     </property>
     </widget>
    </item>
    <item>
@@ -39,7 +42,7 @@
   </layout>
  </widget>
  <resources>
-  <include location="buttons.qrc" />
+  <include location="profit.qrc" />
  </resources>
  <connections/>
 </ui>
