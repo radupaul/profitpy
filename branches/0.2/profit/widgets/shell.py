@@ -95,7 +95,13 @@ class PythonShell(QTextEdit):
         
     def setupInterp(self):
         self.interp = PythonInterpreter(output=sys.stderr)
-        self.interp.update(shell=self, quit=self.eofPrompt, exit=self.eofPrompt)
+        self.interp.update(
+            shell=self,
+            quit=self.eofPrompt,
+            exit=self.eofPrompt,
+            app=QApplication.instance(),
+            main=self.window(),
+        )
         
     def setupUi(self):
         font = QFont(self.font())

@@ -5,6 +5,8 @@ Requires the guitest_ module.
 
 .. _guitest:  https://svn.enthought.com/enthought/browser/trunk/src/lib/enthought/guitest
 
+TODO:
+    add option to loop forever
 
 """
 import logging

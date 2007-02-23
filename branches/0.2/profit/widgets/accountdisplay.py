@@ -15,8 +15,8 @@ class AccountDisplay(QFrame, Ui_AccountDisplay):
         QFrame.__init__(self, parent)
         self.setupUi(self)
         self.accountItems = {}
-        self.accountValuesTable.verticalHeader().hide()        
-        session.register('AccountValue', self.on_accountValue)
+        self.accountValuesTable.verticalHeader().hide()
+        session.register(self.on_accountValue, 'UpdateAccountValue')
 
     def on_accountValue(self, message):
         key, value, currency, accountName = \
@@ -45,4 +45,3 @@ class AccountDisplay(QFrame, Ui_AccountDisplay):
 
 class AccountTableItem(ValueTableItem):
     pass
-        

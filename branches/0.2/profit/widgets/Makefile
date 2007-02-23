@@ -10,7 +10,7 @@ objects := $(addsuffix .py, $(basename $(wildcard *.ui)))
 
 
 
-.PHONY: all clean full $(objects) $(rcout)
+.PHONY: all clean full $(rcout)
 
 all: $(objects)
 

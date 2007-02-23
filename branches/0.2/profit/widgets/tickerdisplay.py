@@ -7,7 +7,7 @@
 from PyQt4.QtCore import Qt
 from PyQt4.QtGui import QFrame, QIcon
 
-from ib.types import TickType
+from ib.ext.TickType import TickType
 
 from profit.lib import ValueTableItem
 from profit.widgets.ui_tickerdisplay import Ui_TickerDisplay
@@ -27,11 +27,12 @@ class TickerDisplay(QFrame, Ui_TickerDisplay):
     def __init__(self, session, parent=None):
         QFrame.__init__(self, parent)
         self.setupUi(self)
+        self.resizeIndex = {}
         self.tickerItems = {}
-        self.tickers = session['tickers']        
+        self.tickers = session['tickers']
         self.tickerTable.verticalHeader().hide()
-        session.register('TickPrice', self.on_tickerPriceSize)
-        session.register('TickSize', self.on_tickerPriceSize)
+        session.register(self.on_tickerPriceSize, 'TickPrice')
+        session.register(self.on_tickerPriceSize, 'TickSize')
 
     def on_tickerPriceSize(self, message):
         tid = message.tickerId
@@ -59,8 +60,15 @@ class TickerDisplay(QFrame, Ui_TickerDisplay):
         except (KeyError, ):
             pass
         else:
-            items[index].setValue(message.value)
-            table.resizeColumnToContents(index)            
+            try:
+                value = message.price
+            except (AttributeError, ):
+                value = message.size
+            items[index].setValue(value)
+            if index not in self.resizeIndex:
+                self.resizeIndex[index] = True
+                table.resizeColumnToContents(index)
+
         table.setUpdatesEnabled(True)
 
 

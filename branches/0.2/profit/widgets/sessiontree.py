@@ -24,7 +24,7 @@ class SessionTree(QWidget, Ui_SessionTree):
                      self.on_itemDoubleClicked)
         self.connect(tree, Signals.itemDoubleClicked, window,
                      Signals.sessionItemClicked)
-        
+
     def on_sessionCreated(self, session):
         self.session = session
         widget = self.tree()
@@ -37,7 +37,7 @@ class SessionTree(QWidget, Ui_SessionTree):
                 for v in value:
                     i = QTreeWidgetItem(item)
                     i.setText(0, v)
-                    
+
     def on_itemDoubleClicked(self, item, col):
         pass
         #print >> sys.__stdout__, '###', item.text(0), col

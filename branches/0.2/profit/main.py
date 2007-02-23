@@ -34,7 +34,7 @@ __about__ = {
 
 
 class MainWindow(QMainWindow, Ui_MainWindow):
-    
+
     def __init__(self, parent=None):
         QMainWindow.__init__(self, parent)
         self.setupUi(self)
@@ -50,15 +50,15 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             out = self.stdoutDock.widget()
             err = self.stderrDock.widget()
             return PythonShell(parent, stdout=out, stderr=err)
-        
+
         self.shellDock = Dock('Shell', self, makeShell,
                               Qt.BottomDockWidgetArea)
-        self.tabifyDockWidget(self.shellDock, self.stdoutDock)        
+        self.tabifyDockWidget(self.shellDock, self.stdoutDock)
         self.tabifyDockWidget(self.stdoutDock, self.stderrDock)
         self.createSession()
         self.readSettings()
 
-        
+
     def setWindowTitle(self, text):
         text = '%s 0.2 (alpha) (r%s)' %(text,  __about__['revision'].split()[1])
         QMainWindow.setWindowTitle(self, text)
@@ -66,7 +66,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
     def createSession(self):
         session = Session()
         self.emit(Signals.sessionCreated, session)
-        
+
     @pyqtSignature('bool')
     def on_actionNewSession_triggered(self, checked=False):
         pid = subprocess.Popen(sys.argv).pid
@@ -90,11 +90,11 @@ class MainWindow(QMainWindow, Ui_MainWindow):
     def on_actionSaveSessionAs_triggered(self, checked=False):
         print '### save session as', checked
 
-    @pyqtSignature('bool')    
+    @pyqtSignature('bool')
     def on_actionCloseSession_triggered(self, checked=False):
         self.close()
 
-    @pyqtSignature('bool')    
+    @pyqtSignature('bool')
     def on_actionQuit_triggered(self, checked=False):
         try:
             os.killpg(os.getpgrp(), signal.SIGQUIT)
@@ -112,8 +112,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         size = settings.value(settings.keys.size, settings.defSize).toSize()
         pos = settings.value(settings.keys.pos, settings.defPos).toPoint()
         maxed = settings.value(settings.keys.maximized, False).toBool()
-        settings.endGroup()    
-        self.resize(size)        
+        settings.endGroup()
+        self.resize(size)
         self.move(pos)
         if maxed:
             self.showMaximized()

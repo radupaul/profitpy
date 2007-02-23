@@ -35,11 +35,10 @@ class BrokerDisplay(QFrame, Ui_BrokerWidget):
         QFrame.__init__(self, parent)
         self.setupUi(self)
         self.session = session
-        self.connection = None
         self.hostNameEdit.setText(host)
         self.portNumberEdit.setText(port)
         self.clientIdEdit.setText(client)
-        keyHelperCommand, brokerCommand = commandStrings()        
+        keyHelperCommand, brokerCommand = commandStrings()
         self.keyHelperCommandEdit.setText(keyHelperCommand)
         self.brokerCommandEdit.setText(brokerCommand)
         self.pids = {'broker':[], 'helper':[]}
@@ -55,27 +54,27 @@ class BrokerDisplay(QFrame, Ui_BrokerWidget):
         hostName = str(self.hostNameEdit.text())
         session = self.session
         try:
-            self.connection = connection = \
-                              session.connectTWS(hostName, portNo, clientId)
+            session.connectTWS(hostName, portNo, clientId)
         except (Exception, ), exc:
             QMessageBox.critical(self, 'Connection Error', str(exc))
             return
-        if connection.active():
+        if session.connected:
             self.setEnabledButtons(False, True)
             try:
-                connection.requestTickers()
-                connection.requestAccount()
+                session.requestTickers()
+                session.requestAccount()
+                session.requestOrders()
             except (Exception, ), ex:
                 print ex
                 raise
         else:
-            self.setEnabledButtons(True, False)            
-            
-            
+            self.setEnabledButtons(True, False)
+
+
     @pyqtSignature('')
     def on_disconnectButton_clicked(self):
-        if self.connection and self.connection.active():
-            self.connection.disconnect()
+        if self.session and self.session.connected:
+            self.session.disconnect()
             self.setEnabledButtons(True, False)
             self.setNextClientId()
 
@@ -94,14 +93,14 @@ class BrokerDisplay(QFrame, Ui_BrokerWidget):
             portNo = None
             QMessageBox.critical(self, 'Port Number Error', str(exc))
         return portNo
-    
+
     def setEnabledButtons(self, connect, disconnect):
         self.connectButton.setEnabled(connect)
         self.disconnectButton.setEnabled(disconnect)
         self.clientIdEdit.setReadOnly(disconnect)
         self.portNumberEdit.setReadOnly(disconnect)
         self.hostNameEdit.setReadOnly(disconnect)
-            
+
 
     def setNextClientId(self):
         try:
@@ -110,7 +109,7 @@ class BrokerDisplay(QFrame, Ui_BrokerWidget):
             pass
         else:
             self.clientIdEdit.setText(str(value+1))
-        
+
 
     @pyqtSignature('')
     def on_keyHelperCommandRunButton_clicked(self):
@@ -122,8 +121,8 @@ class BrokerDisplay(QFrame, Ui_BrokerWidget):
         else:
             pid = proc.pid
             self.pids['helper'].append(pid)
-            
-    
+
+
     @pyqtSignature('')
     def on_brokerCommandRunButton_clicked(self):
         args = str(self.brokerCommandEdit.text()).split()
@@ -134,4 +133,3 @@ class BrokerDisplay(QFrame, Ui_BrokerWidget):
         else:
             pid = proc.pid
             self.pids['broker'].append(pid)
-
