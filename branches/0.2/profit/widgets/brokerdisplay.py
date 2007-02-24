@@ -14,15 +14,15 @@ from PyQt4.QtGui import QFrame, QMessageBox
 from profit.widgets.ui_brokerwidget import Ui_BrokerWidget
 
 
-host, port, client = 'localhost', '7496', str(getpid())
+
+
+hasXterm = Popen(['which', 'xterm'], stdout=PIPE).communicate()[0].strip()
 
 
 def commandStrings():
     binDir = abspath(join(dirname(abspath(__file__)), pardir, 'bin'))
-    keyCmd =  join(binDir, 'login_helper')
-    keyCmd += ' -v'
+    keyCmd =  join(binDir, 'login_helper') + ' -v'
     brokerCmd = join(binDir, 'ib_tws')
-    hasXterm = bool(Popen(['which', 'xterm'], stdout=PIPE).communicate()[0].strip())
     if hasXterm:
         commandFs = 'xterm -title %s -e %s'
         keyCmd = commandFs % ('helper', keyCmd, )
@@ -30,14 +30,20 @@ def commandStrings():
     return keyCmd, brokerCmd
 
 
+class defaults(object):
+    host = 'localhost'
+    port = 7496
+    client = getpid()
+
+
 class BrokerDisplay(QFrame, Ui_BrokerWidget):
     def __init__(self, session, parent=None):
         QFrame.__init__(self, parent)
         self.setupUi(self)
         self.session = session
-        self.hostNameEdit.setText(host)
-        self.portNumberEdit.setText(port)
-        self.clientIdEdit.setText(client)
+        self.hostNameEdit.setText(defaults.host)
+        self.portNumberEdit.setText(str(defaults.port))
+        self.clientIdEdit.setText(str(defaults.client))
         keyHelperCommand, brokerCommand = commandStrings()
         self.keyHelperCommandEdit.setText(keyHelperCommand)
         self.brokerCommandEdit.setText(brokerCommand)
@@ -58,7 +64,7 @@ class BrokerDisplay(QFrame, Ui_BrokerWidget):
         except (Exception, ), exc:
             QMessageBox.critical(self, 'Connection Error', str(exc))
             return
-        if session.connected:
+        if session.isConnected:
             self.setEnabledButtons(False, True)
             try:
                 session.requestTickers()
@@ -73,7 +79,7 @@ class BrokerDisplay(QFrame, Ui_BrokerWidget):
 
     @pyqtSignature('')
     def on_disconnectButton_clicked(self):
-        if self.session and self.session.connected:
+        if self.session and self.session.isConnected:
             self.session.disconnect()
             self.setEnabledButtons(True, False)
             self.setNextClientId()
@@ -100,7 +106,6 @@ class BrokerDisplay(QFrame, Ui_BrokerWidget):
         self.clientIdEdit.setReadOnly(disconnect)
         self.portNumberEdit.setReadOnly(disconnect)
         self.hostNameEdit.setReadOnly(disconnect)
-
 
     def setNextClientId(self):
         try:

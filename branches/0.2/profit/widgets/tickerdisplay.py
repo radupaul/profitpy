@@ -27,7 +27,6 @@ class TickerDisplay(QFrame, Ui_TickerDisplay):
     def __init__(self, session, parent=None):
         QFrame.__init__(self, parent)
         self.setupUi(self)
-        self.resizeIndex = {}
         self.tickerItems = {}
         self.tickers = session['tickers']
         self.tickerTable.verticalHeader().hide()
@@ -36,8 +35,14 @@ class TickerDisplay(QFrame, Ui_TickerDisplay):
 
     def on_tickerPriceSize(self, message):
         tid = message.tickerId
+        try:
+            value = message.price
+        except (AttributeError, ):
+            value = message.size
+
         table = self.tickerTable
         table.setUpdatesEnabled(False)
+
         try:
             items = self.tickerItems[tid]
         except (KeyError, ):
@@ -60,14 +65,8 @@ class TickerDisplay(QFrame, Ui_TickerDisplay):
         except (KeyError, ):
             pass
         else:
-            try:
-                value = message.price
-            except (AttributeError, ):
-                value = message.size
             items[index].setValue(value)
-            if index not in self.resizeIndex:
-                self.resizeIndex[index] = True
-                table.resizeColumnToContents(index)
+            table.resizeColumnToContents(index)
 
         table.setUpdatesEnabled(True)
 

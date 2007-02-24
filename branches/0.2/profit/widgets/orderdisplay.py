@@ -23,9 +23,6 @@ class OrderDisplay(QFrame, Ui_OrderDisplay):
 
     def on_openOrder(self, message):
         print '#### open order message', message
-        class __message:
-            __slots__ = ('orderId', 'contract', 'order', )
-
         return
         key, value, currency, accountName = \
              message.key, message.value, message.currency, message.accountName

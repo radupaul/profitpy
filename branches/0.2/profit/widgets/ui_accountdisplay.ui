@@ -28,7 +28,7 @@
       <property name="orientation" >
        <enum>Qt::Horizontal</enum>
       </property>
-      <widget class="QTableWidget" name="accountValuesTable" >
+      <widget class="LocalTable" name="accountValuesTable" >
        <property name="alternatingRowColors" >
         <bool>true</bool>
        </property>
@@ -88,6 +88,13 @@
    </item>
   </layout>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>LocalTable</class>
+   <extends>QTableWidget</extends>
+   <header>localtable.h</header>
+  </customwidget>
+ </customwidgets>
  <resources/>
  <connections/>
 </ui>

@@ -58,12 +58,12 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.createSession()
         self.readSettings()
 
-
     def setWindowTitle(self, text):
         text = '%s 0.2 (alpha) (r%s)' %(text,  __about__['revision'].split()[1])
         QMainWindow.setWindowTitle(self, text)
 
     def createSession(self):
+        ## lookup builder and pass instance here
         session = Session()
         self.emit(Signals.sessionCreated, session)
 
