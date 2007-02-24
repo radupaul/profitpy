@@ -12,7 +12,6 @@ todo:
     orders display
     plots
     add icons to tabs
-    replace 'broker' with 'connection' in filenames and code
 """
 import os
 import signal

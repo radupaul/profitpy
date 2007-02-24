@@ -11,7 +11,7 @@ from subprocess import Popen, PIPE
 
 from PyQt4.QtCore import pyqtSignature
 from PyQt4.QtGui import QFrame, QMessageBox
-from profit.widgets.ui_brokerwidget import Ui_BrokerWidget
+from profit.widgets.ui_connectionwidget import Ui_ConnectionWidget
 
 
 
@@ -36,7 +36,7 @@ class defaults(object):
     client = getpid()
 
 
-class BrokerDisplay(QFrame, Ui_BrokerWidget):
+class ConnectionDisplay(QFrame, Ui_ConnectionWidget):
     def __init__(self, session, parent=None):
         QFrame.__init__(self, parent)
         self.setupUi(self)

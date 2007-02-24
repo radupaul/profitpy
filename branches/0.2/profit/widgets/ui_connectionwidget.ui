@@ -1,6 +1,6 @@
 <ui version="4.0" >
- <class>BrokerWidget</class>
- <widget class="QWidget" name="BrokerWidget" >
+ <class>ConnectionWidget</class>
+ <widget class="QWidget" name="ConnectionWidget" >
   <property name="geometry" >
    <rect>
     <x>0</x>

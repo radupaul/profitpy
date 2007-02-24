@@ -38,31 +38,6 @@
        <string>Object</string>
       </property>
      </column>
-     <item>
-      <property name="text" >
-       <string>Account</string>
-      </property>
-     </item>
-     <item>
-      <property name="text" >
-       <string>Broker</string>
-      </property>
-     </item>
-     <item>
-      <property name="text" >
-       <string>Tickers</string>
-      </property>
-      <item>
-       <property name="text" >
-        <string>One</string>
-       </property>
-       <item>
-        <property name="text" >
-         <string>Other</string>
-        </property>
-       </item>
-      </item>
-     </item>
     </widget>
    </item>
   </layout>

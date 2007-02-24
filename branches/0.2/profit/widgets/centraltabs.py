@@ -10,7 +10,7 @@ from PyQt4.QtGui import QPushButton, QTabWidget, QWidget
 
 from profit.lib import Signals
 from profit.widgets.accountdisplay import AccountDisplay
-from profit.widgets.brokerdisplay import BrokerDisplay
+from profit.widgets.connectiondisplay import ConnectionDisplay
 from profit.widgets.messagedisplay import MessageDisplay
 from profit.widgets.orderdisplay import OrderDisplay
 from profit.widgets.tickerdisplay import TickerDisplay
@@ -78,7 +78,7 @@ class CentralTabs(QTabWidget):
         if text in items:
             idx = items[text]
         else:
-            idx = self.addTab(BrokerDisplay(self.session, self), text)
+            idx = self.addTab(ConnectionDisplay(self.session, self), text)
         self.setCurrentIndex(idx)
 
     def on_sessionOrdersClicked(self, item):
