@@ -11,15 +11,18 @@ todo:
     orders display
     plots
     add icons to tabs
+    add config dialog and session builder class setting
+    add support for session seralization and deserialization
 """
-import os
-import signal
-import subprocess
 import sys
+
+from os import getpgrp, killpg
+from signal import SIGQUIT
+from subprocess import Popen, PIPE
+from time import sleep
 
 from PyQt4.QtCore import Qt, pyqtSignature
 from PyQt4.QtGui import QMainWindow, QFrame
-
 
 from profit.lib import Signals, Settings
 from profit.session import Session
@@ -31,17 +34,15 @@ from profit.widgets.shell import PythonShell
 from profit.widgets.ui_mainwindow import Ui_MainWindow
 
 
-__about__ = {
-    'date':'$Date$',
-    'revision':'$Rev$',
-    'author':'$Author$',
-    'url':'$URL$',
-    'id':'$Id$',
-    }
+def svn_revision():
+    ps = Popen(['svnversion'], stdout=PIPE)
+    pc = Popen(['cut', '-f', '2', '-d', ':'], stdin=ps.stdout, stdout=PIPE)
+    pf = Popen(['cut', '-f', '1', '-d', 'M'], stdin=pc.stdout, stdout=PIPE)
+    sleep(0.01)
+    return pf.communicate()[0].strip()
 
 
 class MainWindow(QMainWindow, Ui_MainWindow):
-
     def __init__(self, parent=None):
         QMainWindow.__init__(self, parent)
         self.setupUi(self)
@@ -66,7 +67,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.readSettings()
 
     def setWindowTitle(self, text):
-        text = '%s 0.2 (alpha) (r%s)' %(text,  __about__['revision'].split()[1])
+        text = '%s 0.2 (alpha) (r%s)' % (text, svn_revision())
         QMainWindow.setWindowTitle(self, text)
 
     def createSession(self):
@@ -76,7 +77,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
     @pyqtSignature('bool')
     def on_actionNewSession_triggered(self, checked=False):
-        pid = subprocess.Popen(sys.argv).pid
+        pid = Popen(sys.argv).pid
         if not pid:
             # handle error
             pass
@@ -104,7 +105,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
     @pyqtSignature('bool')
     def on_actionQuit_triggered(self, checked=False):
         try:
-            os.killpg(os.getpgrp(), signal.SIGQUIT)
+            killpg(getpgrp(), SIGQUIT)
         except (AttributeError, ):
             print >> sys.__stdout__, 'system does not support process groups'
             self.close()

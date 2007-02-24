@@ -31,7 +31,7 @@ class PythonInterpreter(InteractiveInterpreter):
     def __init__(self, output, locals=None):
         InteractiveInterpreter.__init__(self, locals=locals)
         self.output = output
-        
+
     def showtraceback(self):
         """ Display the exception that just occurred.
 
@@ -75,24 +75,24 @@ class PythonShell(QTextEdit):
     )
     ps1 = '>>> '
     ps2 = '... '
-            
+
     def __init__(self, parent, stdout, stderr):
         QTextEdit.__init__(self, parent)
 
         sys.stdout.extend([stdout, self])
         sys.stderr.extend([stderr, self])
-        
+
         self.line = QString()
         self.lines = []
         self.history = []
         self.point = self.more = self.reading = self.pointer = self.pos = 0
-        self.setupInterp()        
+        self.setupInterp()
         self.setupUi()
         self.readShellHistory()
         self.writeBanner()
         self.connect(QApplication.instance(), Signals.lastWindowClosed,
                      self.writeShellHistory)
-        
+
     def setupInterp(self):
         self.interp = PythonInterpreter(output=sys.stderr)
         self.interp.update(
@@ -102,7 +102,7 @@ class PythonShell(QTextEdit):
             app=QApplication.instance(),
             main=self.window(),
         )
-        
+
     def setupUi(self):
         font = QFont(self.font())
         font.setFamily("Bitstream Vera Sans Mono")
@@ -115,7 +115,7 @@ class PythonShell(QTextEdit):
 
     def flush(self):
         pass
-    
+
     def writeBanner(self):
         self.setText('')
         self.write(str.join('', self.introText + (self.ps1, )))
@@ -152,7 +152,7 @@ class PythonShell(QTextEdit):
         self.pos = cursor.position()
         self.setTextCursor(cursor)
         self.ensureCursorVisible()
-        
+
     def run(self):
         self.pointer = 0
         linestr = str(self.line)
@@ -173,7 +173,7 @@ class PythonShell(QTextEdit):
         self.clearLine()
 
     def clearLine(self):
-        self.point = 0        
+        self.point = 0
         self.line.truncate(0)
 
     def insertPlainText(self, text):
@@ -198,11 +198,11 @@ class PythonShell(QTextEdit):
                 self.write(self.eofPrompt + '\n')
                 self.run()
             elif key==Qt.Key_A:
-                self.point = 0                
+                self.point = 0
                 cursor.setPosition(self.pos)
                 self.setTextCursor(cursor)
             elif key==Qt.Key_E:
-                self.point = self.line.length()                 
+                self.point = self.line.length()
                 self.moveCursor(QTextCursor.EndOfLine)
             return
         elif key in (Qt.Key_Return, Qt.Key_Enter):
@@ -216,24 +216,24 @@ class PythonShell(QTextEdit):
         elif key==Qt.Key_Backspace and self.point:
             cursor.movePosition(QTextCursor.PreviousCharacter, QTextCursor.KeepAnchor)
             cursor.removeSelectedText()
-            self.point -= 1 
+            self.point -= 1
             self.line.remove(self.point, 1)
         elif key==Qt.Key_Delete:
             cursor.movePosition(QTextCursor.NextCharacter, QTextCursor.KeepAnchor)
             cursor.removeSelectedText()
             self.line.remove(self.point, 1)
         elif key==Qt.Key_Left and self.point:
-            self.point -= 1 
+            self.point -= 1
             self.moveCursor(QTextCursor.Left)
         elif key==Qt.Key_Right and (self.point < self.line.length()):
-            self.point += 1 
+            self.point += 1
             self.moveCursor(QTextCursor.Right)
         elif key==Qt.Key_Home:
             cursor.setPosition(self.pos)
-            self.point = 0            
+            self.point = 0
             self.setTextCursor(cursor)
         elif key==Qt.Key_End:
-            self.point = self.line.length() 
+            self.point = self.line.length()
             self.moveCursor(QTextCursor.EndOfLine)
         elif key==Qt.Key_Up and self.history:
             if self.pointer==0:
@@ -249,7 +249,7 @@ class PythonShell(QTextEdit):
             self.insertPlainText(text)
         else:
             e.ignore()
-            
+
     def recall(self):
         cursor = self.textCursor()
         cursor.select(QTextCursor.LineUnderCursor)
@@ -264,7 +264,7 @@ class PythonShell(QTextEdit):
     def mousePressEvent(self, e):
         if e.button() == Qt.LeftButton:
             self.moveCursor(QTextCursor.End)
-            
+
     def clear(self):
         self.setPlainText('')
 
@@ -278,8 +278,8 @@ class PythonShell(QTextEdit):
         shelld['device'] = self.topLevelWidget()
         shelld['session'] = session
         shelld.update(session)
-        for ((tid, tsym,), tobj,) in session.tickers.items():
-            shelld[tsym] = tobj
+        #for ((tid, tsym,), tobj,) in session.builder.tickers():
+        #    shelld[tsym] = tobj
 
     def onGuiComplete(self):
         """ onGuiComplete() -> a callback (not a slot) for startup-complete-ness
@@ -294,14 +294,14 @@ class PythonShell(QTextEdit):
             try:
                 for line in startScriptName.readlines():
                     self.interp.runsource(line)
-            except (SyntaxError, ValueError , OverflowError), ex: 
+            except (SyntaxError, ValueError , OverflowError), ex:
                 print 'Compiling code in startup script failed: %s' % (ex, )
             except (Exception ,), ex:
                 print 'Startup script failure (non-compile): %s' % (ex, )
 
 
 class MultiCast(list):
-    """ MultiCast() -> multiplexes messages to registered objects 
+    """ MultiCast() -> multiplexes messages to registered objects
 
         MultiCast is based on Multicast by Eduard Hiti (no license stated):
         http://aspn.activestate.com/ASPN/Cookbook/Python/Recipe/52289
@@ -347,4 +347,3 @@ if __name__ == '__main__':
     window = PythonShell()
     window.show()
     sys.exit(app.exec_())
-    

@@ -9,29 +9,16 @@ import sys
 
 from PyQt4.QtCore import QObject, SIGNAL
 
-from ib.opt import ibConnection
-from ib.opt.message import registry
-
 from ib.ext.Contract import Contract
 from ib.ext.ExecutionFilter import ExecutionFilter
 from ib.ext.Order import Order
+from ib.opt import ibConnection
+from ib.opt.message import registry
 
 from profit.lib import Signals
 
 
 class SessionBuilder(object):
-    def account(self):
-        return None
-
-    def connection(self):
-        return None
-
-    def orders(self):
-        return None
-
-    def portfolio(self):
-        return None
-
     def strategy(self):
         return None
 
@@ -50,15 +37,6 @@ class SessionBuilder(object):
     def order(self):
         return Order()
 
-    def messages(self):
-        pass
-
-    def build(self, session):
-        names = ['account', 'connection', 'orders', 'portfolio', 'strategy', 'tickers', 'messages']
-        for name in names:
-            call = getattr(self, name)
-            session[name] = call()
-
 
 class Session(QObject):
     def __init__(self, data=None, builder=None):
@@ -66,43 +44,30 @@ class Session(QObject):
         self.setObjectName('session')
         self.data = data if data else {}
         self.builder = builder if builder else SessionBuilder()
-        self.builder.build(self)
+        self.connection = None
 
-    def __iter__(self):
-        return iter(self.data)
-
-    def __setitem__(self, key, value):
-        self.data[key] = value
-
-    def __getitem__(self, key):
-        return self.data[key]
+    def items(self):
+        return [
+            ('account', ()),
+            ('connection', ()),
+            ('messages', ()),
+            ('orders', ()),
+            ('portfolio', ()),
+            ('strategy', ()),
+            ('tickers', self.builder.tickers()),
+            ]
 
     def disconnectTWS(self):
         if self.isConnected:
             self.connection.disconnect()
             self.emit(Signals.disconnectedTWS)
 
-    def get_isConnected(self):
+    @property
+    def isConnected(self):
         return self.connection and self.connection.isConnected()
-    isConnected = property(get_isConnected)
 
-    def get_connection(self):
-        return self['connection']
-
-    def set_connection(self, value):
-        self['connection'] = value
-    connection = property(get_connection, set_connection)
-
-    #def deregister(self, call, key):
-    #    self.disconnect(self, SIGNAL(key), call)
-
-    #def deregisterAll(self, call):
-    #    names = [typ.__name__ for typ in registry.values()]
-    #    for name in names:
-    #        self.disconnect(self, SIGNAL(name), call)
-
-    def register(self, call, key):
-        self.connect(self, SIGNAL(key), call)
+    def register(self, call, name):
+        self.connect(self, SIGNAL(name), call)
 
     def registerAll(self, call):
         names = [typ.__name__ for typ in registry.values()]
@@ -147,3 +112,14 @@ class Session(QObject):
         order.m_lmtPrice = contract.m_auxPrice = 78.5
         order.m_openClose = 'O'
         connection.placeOrder(23423, contract, order)
+
+    # not yet needed
+
+    #def deregister(self, call, key):
+    #    self.disconnect(self, SIGNAL(key), call)
+
+    #def deregisterAll(self, call):
+    #    names = [typ.__name__ for typ in registry.values()]
+    #    for name in names:
+    #        self.disconnect(self, SIGNAL(name), call)
+

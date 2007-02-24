@@ -64,9 +64,11 @@ class CentralTabs(QTabWidget):
 
     def on_sessionItemClicked(self, item, col):
         value = str(item.text(0))
-        call = getattr(self, 'on_session%sClicked' % value.capitalize(), None)
-        if call is not None:
+        try:
+            call = getattr(self, 'on_session%sClicked' % value.capitalize())
             call(item)
+        except (AttributeError, TypeError, ):
+            pass
 
     def on_sessionAccountClicked(self, item):
         idx = self.addTab(AccountDisplay(self.session, self), item.text(0))

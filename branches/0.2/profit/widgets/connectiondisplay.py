@@ -14,8 +14,6 @@ from PyQt4.QtGui import QFrame, QMessageBox
 from profit.widgets.ui_connectionwidget import Ui_ConnectionWidget
 
 
-
-
 hasXterm = Popen(['which', 'xterm'], stdout=PIPE).communicate()[0].strip()
 
 
@@ -33,7 +31,7 @@ def commandStrings():
 class defaults(object):
     host = 'localhost'
     port = 7496
-    client = getpid()
+    client = 0 # getpid()
 
 
 class ConnectionDisplay(QFrame, Ui_ConnectionWidget):
@@ -70,10 +68,12 @@ class ConnectionDisplay(QFrame, Ui_ConnectionWidget):
                 session.requestTickers()
                 session.requestAccount()
                 session.requestOrders()
-            except (Exception, ), ex:
-                print ex
+            except (Exception, ), exc:
+                QMessageBox.critical(self, 'Session Error', str(exc))
                 raise
         else:
+            QMessageBox.critical(self, 'Connection Error',
+                                 'Unable to connect.')
             self.setEnabledButtons(True, False)
 
 
