@@ -5,6 +5,15 @@
 # Distributed under the terms of the GNU General Public License v2
 # Author: Troy Melhase <troy@gci.net>
 
+"""
+todo:
+    portfolio display
+    executions display
+    orders display
+    plots
+    add icons to tabs
+    replace 'broker' with 'connection' in filenames and code
+"""
 import os
 import signal
 import subprocess

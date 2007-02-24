@@ -80,7 +80,7 @@ class BrokerDisplay(QFrame, Ui_BrokerWidget):
     @pyqtSignature('')
     def on_disconnectButton_clicked(self):
         if self.session and self.session.isConnected:
-            self.session.disconnect()
+            self.session.disconnectTWS()
             self.setEnabledButtons(True, False)
             self.setNextClientId()
 

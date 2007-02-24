@@ -8,25 +8,29 @@
 from PyQt4.QtCore import QPoint, QSettings, QSize, QVariant, Qt, SIGNAL, SLOT
 from PyQt4.QtGui import QBrush, QColor, QTableWidgetItem
 
+
 class Signals:
     lastWindowClosed = SIGNAL('lastWindowClosed()')
     sessionCreated = SIGNAL('sessionCreated(PyQt_PyObject)')
     sessionItemClicked = itemDoubleClicked = SIGNAL('itemDoubleClicked(QTreeWidgetItem *,int)')
-
+    connectedTWS = SIGNAL('connectedTWS')
+    disconnectedTWS = SIGNAL('disconnectedTWS')
+    clicked = SIGNAL('clicked()')
+    currentChanged = SIGNAL('currentChanged(int)')
 
 class Settings(QSettings):
     class keys:
         main = 'MainWindow'
-        session = 'Session'    
+        session = 'Session'
         org = 'ProfitPy'
         app = 'ProfitDevice'
         size = 'Size'
         pos = 'Position'
         maximized = 'Maximized'
-    
+
     defSize = QSize(400, 400)
     defPos = QPoint(200, 200)
-    
+
     def __init__(self):
         QSettings.__init__(self, self.keys.org, self.keys.app)
 
@@ -63,10 +67,10 @@ class ValueTableItem(QTableWidgetItem):
     red = QBrush(QColor('red'))
     green = QBrush(QColor('green'))
     blue = QBrush(QColor('blue'))
-    
+
     def __init__(self):
         QTableWidgetItem.__init__(self, self.UserType)
-        self.setFlags(self.flags() & ~Qt.ItemIsEditable)        
+        self.setFlags(self.flags() & ~Qt.ItemIsEditable)
         self.value = None
 
     def setValue(self, value):
@@ -83,9 +87,8 @@ class ValueTableItem(QTableWidgetItem):
         if value < current:
             self.setForeground(self.red)
         elif value > current:
-            self.setForeground(self.green)                
+            self.setForeground(self.green)
         else:
             self.setForeground(self.blue)
         self.value = value
         self.setText(str(value))
-    

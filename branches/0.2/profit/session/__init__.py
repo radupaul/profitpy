@@ -16,6 +16,8 @@ from ib.ext.Contract import Contract
 from ib.ext.ExecutionFilter import ExecutionFilter
 from ib.ext.Order import Order
 
+from profit.lib import Signals
+
 
 class SessionBuilder(object):
     def account(self):
@@ -58,6 +60,7 @@ class SessionBuilder(object):
 class Session(QObject):
     def __init__(self, data=None, builder=None):
         QObject.__init__(self)
+        self.setObjectName('session')
         self.data = data if data else {}
         self.builder = builder if builder else SessionBuilder()
         self.builder.build(self)
@@ -71,9 +74,10 @@ class Session(QObject):
     def __getitem__(self, key):
         return self.data[key]
 
-    def disconnect(self):
+    def disconnectTWS(self):
         if self.isConnected:
             self.connection.disconnect()
+            self.emit(Signals.disconnectedTWS)
 
     def get_isConnected(self):
         return self.connection and self.connection.isConnected()
@@ -85,6 +89,14 @@ class Session(QObject):
     def set_connection(self, value):
         self['connection'] = value
     connection = property(get_connection, set_connection)
+
+    #def deregister(self, call, key):
+    #    self.disconnect(self, SIGNAL(key), call)
+
+    #def deregisterAll(self, call):
+    #    names = [typ.__name__ for typ in registry.values()]
+    #    for name in names:
+    #        self.disconnect(self, SIGNAL(name), call)
 
     def register(self, call, key):
         self.connect(self, SIGNAL(key), call)
@@ -99,6 +111,7 @@ class Session(QObject):
         #con.enableLogging()
         con.connect()
         con.registerAll(self.receiveMessage)
+        self.emit(Signals.connectedTWS)
 
     def receiveMessage(self, message):
         self.emit(SIGNAL(message.__class__.__name__), message)

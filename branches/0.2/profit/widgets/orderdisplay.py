@@ -4,6 +4,7 @@
 # Copyright 2007 Troy Melhase <troy@gci.net>
 # Distributed under the terms of the GNU General Public License v2
 
+from PyQt4.QtCore import Qt
 from PyQt4.QtGui import QFrame
 
 from profit.lib import ValueTableItem
@@ -13,6 +14,7 @@ from profit.widgets.ui_orderdisplay import Ui_OrderDisplay
 class OrderDisplay(QFrame, Ui_OrderDisplay):
     def __init__(self, session, parent=None):
         QFrame.__init__(self, parent)
+        self.setAttribute(Qt.WA_DeleteOnClose)
         self.setupUi(self)
         self.orderItems = {}
         self.orderTable.verticalHeader().hide()
@@ -20,6 +22,7 @@ class OrderDisplay(QFrame, Ui_OrderDisplay):
         session.register(self.on_orderStatus, 'OrderStatus')
         session.register(self.on_contractDetails, 'ContractDetails')
         session.register(self.on_execution, 'Execution')
+
 
     def on_openOrder(self, message):
         print '#### open order message', message
