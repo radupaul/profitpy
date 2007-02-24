@@ -7,7 +7,6 @@
 
 """
 todo:
-    portfolio display
     executions display
     orders display
     plots

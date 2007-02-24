@@ -51,7 +51,7 @@ class TickerDisplay(QFrame, Ui_TickerDisplay):
             row = table.rowCount()
             table.insertRow(row)
             items = self.tickerItems[tid] = \
-                    [TickerTableItem() for i in range(columnCount)]
+                    [ValueTableItem() for i in range(columnCount)]
             items[0].setSymbol(sym)
             for item in items[1:]:
                 item.setValueAlign()
@@ -69,14 +69,3 @@ class TickerDisplay(QFrame, Ui_TickerDisplay):
             table.resizeColumnToContents(index)
 
         table.setUpdatesEnabled(True)
-
-
-class TickerTableItem(ValueTableItem):
-    def setSymbol(self, value):
-        icon = QIcon(':images/tickers/%s.png' % (value.lower(), ))
-        if not icon.isNull():
-            self.setIcon(icon)
-        self.setText(value)
-
-    def setValueAlign(self):
-        self.setTextAlignment(Qt.AlignRight|Qt.AlignVCenter)

@@ -13,6 +13,7 @@ from profit.widgets.accountdisplay import AccountDisplay
 from profit.widgets.connectiondisplay import ConnectionDisplay
 from profit.widgets.messagedisplay import MessageDisplay
 from profit.widgets.orderdisplay import OrderDisplay
+from profit.widgets.portfoliodisplay import PortfolioDisplay
 from profit.widgets.tickerdisplay import TickerDisplay
 
 
@@ -91,4 +92,8 @@ class CentralTabs(QTabWidget):
 
     def on_sessionMessagesClicked(self, item):
         idx = self.addTab(MessageDisplay(self.session, self), item.text(0))
+        self.setCurrentIndex(idx)
+
+    def on_sessionPortfolioClicked(self, item):
+        idx = self.addTab(PortfolioDisplay(self.session, self), item.text(0))
         self.setCurrentIndex(idx)

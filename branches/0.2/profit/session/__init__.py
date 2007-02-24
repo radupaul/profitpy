@@ -29,6 +29,9 @@ class SessionBuilder(object):
     def orders(self):
         return None
 
+    def portfolio(self):
+        return None
+
     def strategy(self):
         return None
 
@@ -51,7 +54,7 @@ class SessionBuilder(object):
         pass
 
     def build(self, session):
-        names = ['account', 'connection', 'orders', 'strategy', 'tickers', 'messages']
+        names = ['account', 'connection', 'orders', 'portfolio', 'strategy', 'tickers', 'messages']
         for name in names:
             call = getattr(self, name)
             session[name] = call()

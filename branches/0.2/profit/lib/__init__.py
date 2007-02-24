@@ -6,7 +6,7 @@
 # Author: Troy Melhase <troy@gci.net>
 
 from PyQt4.QtCore import QPoint, QSettings, QSize, QVariant, Qt, SIGNAL, SLOT
-from PyQt4.QtGui import QBrush, QColor, QTableWidgetItem
+from PyQt4.QtGui import QBrush, QColor, QIcon, QTableWidgetItem
 
 
 class Signals:
@@ -92,3 +92,12 @@ class ValueTableItem(QTableWidgetItem):
             self.setForeground(self.blue)
         self.value = value
         self.setText(str(value))
+
+    def setSymbol(self, value):
+        icon = QIcon(':images/tickers/%s.png' % (value.lower(), ))
+        if not icon.isNull():
+            self.setIcon(icon)
+        self.setText(value)
+
+    def setValueAlign(self):
+        self.setTextAlignment(Qt.AlignRight|Qt.AlignVCenter)
