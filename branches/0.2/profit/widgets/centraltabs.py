@@ -36,7 +36,7 @@ class CloseTabButton(QPushButton):
 class CentralTabs(QTabWidget):
     def __init__(self, parent=None):
         QTabWidget.__init__(self, parent)
-        self.connect(self.window(), Signals.sessionItemClicked,
+        self.connect(self.window(), Signals.itemDoubleClicked,
                      self.on_sessionItemClicked)
         self.session = None
         self.closeTabButton = closeTabButton = CloseTabButton(self)

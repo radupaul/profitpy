@@ -5,23 +5,20 @@
 # Distributed under the terms of the GNU General Public License v2
 # Author: Troy Melhase <troy@gci.net>
 
-"""
-todo:
-    search bar for tickers,orders,account,etc.
-    complete account dock widget
-    executions display
-    orders display
-    plots
-    add config dialog and session builder class setting
-    add support for session seralization and deserialization
-"""
-import sys
+# todo:
+#    search bar for tickers, orders, account, etc.
+#    complete account dock widget
+#    executions display
+#    orders display
+#    plots
+#    add config dialog and session builder class setting
+#    add support for session seralization and deserialization
+#    add "new empty row" function to localtable; cleanup table displays
 
 from functools import partial
-from os import getpgrp, killpg
+from os import P_NOWAIT, getpgrp, killpg, popen, spawnvp
 from signal import SIGQUIT
-from subprocess import Popen, PIPE
-from time import sleep
+from sys import argv
 
 from PyQt4.QtCore import Qt, pyqtSignature
 from PyQt4.QtGui import QMainWindow, QFrame
@@ -37,13 +34,7 @@ from profit.widgets.ui_mainwindow import Ui_MainWindow
 
 
 def svn_revision():
-    ps = Popen(['svnversion'], stdout=PIPE)
-    sleep(0.1)
-    pc = Popen(['cut', '-f', '2', '-d', ':'], stdin=ps.stdout, stdout=PIPE)
-    sleep(0.1)
-    pf = Popen(['cut', '-f', '1', '-d', 'M'], stdin=pc.stdout, stdout=PIPE)
-    sleep(0.1)
-    return pf.communicate()[0].strip()
+    return popen('svnversion|cut -f 2 -d :|cut -f 1 -d M').read().strip()
 
 
 class MainWindow(QMainWindow, Ui_MainWindow):
@@ -72,7 +63,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.tabifyDockWidget(self.stdoutDock, self.stderrDock)
 
     def setWindowTitle(self, text):
-        text = '%s 0.2 (alpha) (r%s)' % (text, svn_revision())
+        text = '%s 0.2 (alpha) (r %s)' % (text, svn_revision())
         QMainWindow.setWindowTitle(self, text)
 
     def createSession(self):
@@ -82,10 +73,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
     @pyqtSignature('bool')
     def on_actionNewSession_triggered(self, checked=False):
-        pid = Popen(sys.argv).pid
-        if not pid:
-            # handle error
-            pass
+        pid = spawnvp(P_NOWAIT, argv[0], argv)
 
     @pyqtSignature('bool')
     def on_actionOpenSession_triggered(self, checked=False):
@@ -112,7 +100,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         try:
             killpg(getpgrp(), SIGQUIT)
         except (AttributeError, ):
-            print >> sys.__stdout__, 'system does not support process groups'
             self.close()
 
     def closeEvent(self, event):
@@ -122,8 +109,10 @@ class MainWindow(QMainWindow, Ui_MainWindow):
     def readSettings(self):
         settings = Settings()
         settings.beginGroup(settings.keys.main)
-        size = settings.value(settings.keys.size, settings.defSize).toSize()
-        pos = settings.value(settings.keys.pos, settings.defPos).toPoint()
+        size = settings.value(settings.keys.size,
+                              settings.defaultSize).toSize()
+        pos = settings.value(settings.keys.position,
+                             settings.defaultPosition).toPoint()
         maxed = settings.value(settings.keys.maximized, False).toBool()
         settings.endGroup()
         self.resize(size)
@@ -135,6 +124,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         settings = Settings()
         settings.beginGroup(settings.keys.main)
         settings.setValue(settings.keys.size, self.size())
-        settings.setValue(settings.keys.pos, self.pos())
+        settings.setValue(settings.keys.position, self.pos())
         settings.setValue(settings.keys.maximized, self.isMaximized())
         settings.endGroup()
