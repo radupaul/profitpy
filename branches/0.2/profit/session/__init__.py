@@ -6,6 +6,7 @@
 # Author: Troy Melhase <troy@gci.net>
 
 import sys
+from cPickle import PicklingError, UnpicklingError, dump, load
 
 from PyQt4.QtCore import QObject, SIGNAL
 
@@ -45,6 +46,9 @@ class Session(QObject):
         self.data = data if data else {}
         self.builder = builder if builder else SessionBuilder()
         self.connection = None
+        self.messages = []
+        self.savepoint = 0 # len messages
+        self.filename = None
 
     def items(self):
         return [
@@ -64,7 +68,11 @@ class Session(QObject):
 
     @property
     def isConnected(self):
-        return self.connection and self.connection.isConnected()
+        return bool(self.connection and self.connection.isConnected())
+
+    @property
+    def isModified(self):
+        return len(self.messages) != self.savepoint
 
     def register(self, call, name):
         self.connect(self, SIGNAL(name), call)
@@ -82,11 +90,12 @@ class Session(QObject):
         self.emit(Signals.connectedTWS)
 
     def receiveMessage(self, message):
+        self.messages.append(message)
         self.emit(SIGNAL(message.__class__.__name__), message)
 
     def requestTickers(self):
         connection = self.connection
-        for sym, tid in self['tickers'].items():
+        for sym, tid in self.builder.tickers().items():
             contract = self.builder.contract(sym)
             connection.reqMktData(tid, contract, '')
             connection.reqMktDepth(tid, contract, 1)
@@ -112,6 +121,45 @@ class Session(QObject):
         order.m_lmtPrice = contract.m_auxPrice = 78.5
         order.m_openClose = 'O'
         connection.placeOrder(23423, contract, order)
+
+    def save(self):
+        status = False
+        try:
+            handle = open(self.filename, 'wb')
+        except (IOError, ):
+            pass
+        else:
+            last = len(self.messages)
+            messages = self.messages[0:last]
+            try:
+                dump(messages, handle, protocol=-1)
+                self.savepoint = last
+                status = True
+            except (PicklingError, ):
+                pass
+            finally:
+                handle.close()
+        return status
+
+    def load(self, filename):
+        status = False
+        try:
+            handle = open(filename, 'rb')
+        except (IOError, ):
+            pass
+        else:
+            try:
+                messages = load(handle)
+                for message in messages:
+                    self.receiveMessage(message)
+            except (UnpicklingError, ):
+                pass
+            finally:
+                self.filename = filename
+                self.savepoint = len(messages)
+                handle.close()
+        return status
+
 
     # not yet needed
 
