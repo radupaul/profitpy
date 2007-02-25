@@ -7,6 +7,8 @@
 
 """
 todo:
+    search bar for tickers,orders,account,etc.
+    complete account dock widget
     executions display
     orders display
     plots

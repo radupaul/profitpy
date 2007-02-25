@@ -4,11 +4,7 @@
 # Copyright 2007 Troy Melhase <troy@gci.net>
 # Distributed under the terms of the GNU General Public License v2
 
-"""
-todo:
-    enable search filtering
-    add pause/resume
-"""
+from functools import partial
 from itertools import count
 from time import ctime
 
@@ -17,20 +13,25 @@ from PyQt4.QtGui import QIcon, QFrame, QMenu
 
 from ib.opt.message import registry
 
-from profit.lib import ValueTableItem
+from profit.lib import ValueTableItem, nogc
 from profit.widgets.ui_messagedisplay import Ui_MessageDisplay
 
 
 def registry_type_names():
     return set([t.__name__ for t in registry.values()])
 
-keeparound = set()
-
-def nogc(f):
-    keeparound.add(f)
-    return f
 
 class MessageDisplay(QFrame, Ui_MessageDisplay):
+    pauseButtonIcons = {
+        True:':/images/icons/player_play.png',
+        False:':/images/icons/player_pause.png',
+    }
+
+    pauseButtonText = {
+        True:'Resume',
+        False:'Pause',
+    }
+
     def __init__(self, session, parent=None):
         QFrame.__init__(self, parent)
         self.setupUi(self)
@@ -43,10 +44,9 @@ class MessageDisplay(QFrame, Ui_MessageDisplay):
     @pyqtSignature('bool')
     def on_pauseButton_clicked(self, checked=False):
         self.paused = checked
-        self.pauseButton.setText('Resume' if checked else 'Pause')
-        iconname = 'play.png' if checked else 'pause.png'
-        self.pauseButton.setIcon(QIcon(':/images/icons/player_'+iconname))
-        if not self.paused:
+        self.pauseButton.setText(self.pauseButtonText[checked])
+        self.pauseButton.setIcon(QIcon(self.pauseButtonIcons[checked]))
+        if not checked:
             self.updateRowsFromDisplay()
 
     def setupDisplayButton(self):
@@ -62,9 +62,7 @@ class MessageDisplay(QFrame, Ui_MessageDisplay):
 
         for action in actions:
             action.setCheckable(True)
-            @nogc
-            def target(action=action):
-                self.displayActionTriggered(action)
+            target = nogc(partial(self.displayActionTriggered, action=action))
             self.connect(action, SIGNAL('triggered()'), target)
         allAction.setChecked(True)
 

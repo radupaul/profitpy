@@ -101,3 +101,18 @@ class ValueTableItem(QTableWidgetItem):
 
     def setValueAlign(self):
         self.setTextAlignment(Qt.AlignRight|Qt.AlignVCenter)
+
+
+references = set()
+
+
+def nogc(obj):
+    """ Prevents garbage collection.
+
+    This function is usable as a decorator.
+
+    @param obj any object
+    @return obj
+    """
+    references.add(obj)
+    return obj
