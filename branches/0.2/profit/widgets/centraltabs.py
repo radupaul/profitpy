@@ -6,7 +6,7 @@
 # Author: Troy Melhase <troy@gci.net>
 
 from PyQt4.QtCore import Qt, pyqtSignature
-from PyQt4.QtGui import QPushButton, QTabWidget, QWidget
+from PyQt4.QtGui import QIcon, QPushButton, QTabWidget, QWidget
 
 from profit.lib import Signals
 from profit.widgets.accountdisplay import AccountDisplay
@@ -17,17 +17,30 @@ from profit.widgets.portfoliodisplay import PortfolioDisplay
 from profit.widgets.tickerdisplay import TickerDisplay
 
 
+def tabWidgetMethod(cls):
+    def method(self, item):
+        widget = cls(self.session, self)
+        index = self.addTab(widget, item.text(0))
+        self.setCurrentIndex(index)
+        return index
+    return method
+
+
+class CloseTabButton(QPushButton):
+    def __init__(self, parent=None):
+        QPushButton.__init__(self, parent)
+        self.setIcon(QIcon(':images/icons/tab_remove.png'))
+        self.setFlat(True)
+
+
 class CentralTabs(QTabWidget):
     def __init__(self, parent=None):
         QTabWidget.__init__(self, parent)
         self.connect(self.window(), Signals.sessionItemClicked,
                      self.on_sessionItemClicked)
         self.session = None
-        self.closeTabButton = closeTabButton = QPushButton('Close Tab', self)
-        self.closeTabButton.setFlat(True)
-
+        self.closeTabButton = closeTabButton = CloseTabButton(self)
         self.setCornerWidget(closeTabButton, Qt.TopRightCorner)
-
         connect = self.connect
         connect(closeTabButton, Signals.clicked, self.on_closeTabButton_clicked)
         connect(self, Signals.currentChanged, self.on_currentChanged)
@@ -66,13 +79,11 @@ class CentralTabs(QTabWidget):
         value = str(item.text(0))
         try:
             call = getattr(self, 'on_session%sClicked' % value.capitalize())
-            call(item)
+            index = call(item)
         except (AttributeError, TypeError, ):
             pass
-
-    def on_sessionAccountClicked(self, item):
-        idx = self.addTab(AccountDisplay(self.session, self), item.text(0))
-        self.setCurrentIndex(idx)
+        else:
+            self.setTabIcon(index, item.icon(0))
 
     def on_sessionConnectionClicked(self, item):
         items = [(str(self.tabText(i)), i) for i in range(self.count())]
@@ -83,19 +94,11 @@ class CentralTabs(QTabWidget):
         else:
             idx = self.addTab(ConnectionDisplay(self.session, self), text)
         self.setCurrentIndex(idx)
+        return idx
 
-    def on_sessionOrdersClicked(self, item):
-        idx = self.addTab(OrderDisplay(self.session, self), item.text(0))
-        self.setCurrentIndex(idx)
 
-    def on_sessionTickersClicked(self, item):
-        idx = self.addTab(TickerDisplay(self.session, self), item.text(0))
-        self.setCurrentIndex(idx)
-
-    def on_sessionMessagesClicked(self, item):
-        idx = self.addTab(MessageDisplay(self.session, self), item.text(0))
-        self.setCurrentIndex(idx)
-
-    def on_sessionPortfolioClicked(self, item):
-        idx = self.addTab(PortfolioDisplay(self.session, self), item.text(0))
-        self.setCurrentIndex(idx)
+    on_sessionAccountClicked = tabWidgetMethod(AccountDisplay)
+    on_sessionOrdersClicked = tabWidgetMethod(OrderDisplay)
+    on_sessionTickersClicked = tabWidgetMethod(TickerDisplay)
+    on_sessionMessagesClicked = tabWidgetMethod(MessageDisplay)
+    on_sessionPortfolioClicked = tabWidgetMethod(PortfolioDisplay)

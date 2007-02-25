@@ -21,8 +21,7 @@
      <number>0</number>
     </property>
     <item>
-     <widget class="CentralTabs" name="centralTabs" >
-     </widget>
+     <widget class="CentralTabs" name="centralTabs" />
     </item>
    </layout>
   </widget>
@@ -32,7 +31,7 @@
      <x>0</x>
      <y>0</y>
      <width>558</width>
-     <height>32</height>
+     <height>28</height>
     </rect>
    </property>
    <widget class="QMenu" name="menu_Edit" >
@@ -73,6 +72,9 @@
   </widget>
   <widget class="QStatusBar" name="statusbar" />
   <action name="actionNewSession" >
+   <property name="icon" >
+    <iconset resource="profit.qrc" >:/images/icons/filenew.png</iconset>
+   </property>
    <property name="text" >
     <string>&amp;New Session...</string>
    </property>
@@ -81,6 +83,9 @@
    </property>
   </action>
   <action name="actionOpenSession" >
+   <property name="icon" >
+    <iconset resource="profit.qrc" >:/images/icons/fileopen.png</iconset>
+   </property>
    <property name="text" >
     <string>&amp;Open Session...</string>
    </property>
@@ -94,6 +99,9 @@
    </property>
   </action>
   <action name="actionSave" >
+   <property name="icon" >
+    <iconset resource="profit.qrc" >:/images/icons/filesave.png</iconset>
+   </property>
    <property name="text" >
     <string>&amp;Save Session</string>
    </property>
@@ -102,11 +110,17 @@
    </property>
   </action>
   <action name="actionSaveSessionAs" >
+   <property name="icon" >
+    <iconset resource="profit.qrc" >:/images/icons/filesaveas.png</iconset>
+   </property>
    <property name="text" >
     <string>Save Session &amp;As...</string>
    </property>
   </action>
   <action name="actionCloseSession" >
+   <property name="icon" >
+    <iconset resource="profit.qrc" >:/images/icons/fileclose.png</iconset>
+   </property>
    <property name="text" >
     <string>&amp;Close Session</string>
    </property>
@@ -115,6 +129,9 @@
    </property>
   </action>
   <action name="actionQuit" >
+   <property name="icon" >
+    <iconset resource="profit.qrc" >:/images/icons/exit.png</iconset>
+   </property>
    <property name="text" >
     <string>&amp;Quit</string>
    </property>
@@ -130,7 +147,9 @@
    <header>centraltabs.h</header>
   </customwidget>
  </customwidgets>
- <resources/>
+ <resources>
+  <include location="profit.qrc" />
+ </resources>
  <connections>
   <connection>
    <sender>actionQuit</sender>

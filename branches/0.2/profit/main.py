@@ -36,9 +36,11 @@ from profit.widgets.ui_mainwindow import Ui_MainWindow
 
 def svn_revision():
     ps = Popen(['svnversion'], stdout=PIPE)
+    sleep(0.1)
     pc = Popen(['cut', '-f', '2', '-d', ':'], stdin=ps.stdout, stdout=PIPE)
+    sleep(0.1)
     pf = Popen(['cut', '-f', '1', '-d', 'M'], stdin=pc.stdout, stdout=PIPE)
-    sleep(0.01)
+    sleep(0.1)
     return pf.communicate()[0].strip()
 
 
