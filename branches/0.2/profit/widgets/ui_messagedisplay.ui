@@ -46,12 +46,18 @@
          <property name="text" >
           <string>Display</string>
          </property>
+         <property name="icon" >
+          <iconset resource="profit.qrc" >:/images/icons/filter.png</iconset>
+         </property>
         </widget>
        </item>
        <item>
         <widget class="QPushButton" name="pauseButton" >
          <property name="text" >
           <string>Pause</string>
+         </property>
+         <property name="icon" >
+          <iconset resource="profit.qrc" >:/images/icons/player_pause.png</iconset>
          </property>
          <property name="checkable" >
           <bool>true</bool>
@@ -99,16 +105,18 @@
  </widget>
  <customwidgets>
   <customwidget>
-   <class>LocalTable</class>
-   <extends>QTableWidget</extends>
-   <header>localtable.h</header>
-  </customwidget>
-  <customwidget>
    <class>SearchBar</class>
    <extends>QWidget</extends>
    <header>searchbar.h</header>
   </customwidget>
+  <customwidget>
+   <class>LocalTable</class>
+   <extends>QTableWidget</extends>
+   <header>localtable.h</header>
+  </customwidget>
  </customwidgets>
- <resources/>
+ <resources>
+  <include location="profit.qrc" />
+ </resources>
  <connections/>
 </ui>

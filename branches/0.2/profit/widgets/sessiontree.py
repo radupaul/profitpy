@@ -11,8 +11,6 @@ from profit.lib import Signals
 from profit.widgets.ui_sessiontree import Ui_SessionTree
 
 
-
-
 class SessionTreeItem(QTreeWidgetItem):
     def __init__(self, parent, *strings):
         QTreeWidgetItem.__init__(self, parent, list(strings))
@@ -80,5 +78,3 @@ class SessionTree(QWidget, Ui_SessionTree):
     def on_itemDoubleClicked(self, item, col):
         #print >> sys.__stdout__, '###', item.text(0), col
         pass
-
-

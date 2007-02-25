@@ -132,6 +132,9 @@
           <property name="text" >
            <string>Connect</string>
           </property>
+          <property name="icon" >
+           <iconset resource="profit.qrc" >:/images/icons/connect_established.png</iconset>
+          </property>
          </widget>
         </item>
         <item>
@@ -141,6 +144,9 @@
           </property>
           <property name="text" >
            <string>Disconnect</string>
+          </property>
+          <property name="icon" >
+           <iconset resource="profit.qrc" >:/images/icons/connect_no.png</iconset>
           </property>
          </widget>
         </item>
@@ -265,12 +271,18 @@
             <property name="text" >
              <string>Run</string>
             </property>
+            <property name="icon" >
+             <iconset resource="profit.qrc" >:/images/icons/run.png</iconset>
+            </property>
            </widget>
           </item>
           <item row="0" column="2" >
            <widget class="QPushButton" name="brokerCommandRunButton" >
             <property name="text" >
              <string>Run</string>
+            </property>
+            <property name="icon" >
+             <iconset resource="profit.qrc" >:/images/icons/run.png</iconset>
             </property>
            </widget>
           </item>
@@ -296,6 +308,8 @@
    </item>
   </layout>
  </widget>
- <resources/>
+ <resources>
+  <include location="profit.qrc" />
+ </resources>
  <connections/>
 </ui>

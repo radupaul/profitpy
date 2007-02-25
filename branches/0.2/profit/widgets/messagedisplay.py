@@ -44,6 +44,8 @@ class MessageDisplay(QFrame, Ui_MessageDisplay):
     def on_pauseButton_clicked(self, checked=False):
         self.paused = checked
         self.pauseButton.setText('Resume' if checked else 'Pause')
+        iconname = 'play.png' if checked else 'pause.png'
+        self.pauseButton.setIcon(QIcon(':/images/icons/player_'+iconname))
         if not self.paused:
             self.updateRowsFromDisplay()
 

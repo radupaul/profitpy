@@ -74,9 +74,9 @@ class Session(QObject):
         for name in names:
             self.connect(self, SIGNAL(name), call)
 
-    def connectTWS(self, hostName, portNo, clientId):
+    def connectTWS(self, hostName, portNo, clientId, enableLogging=False):
         self.connection = con = ibConnection(hostName, portNo, clientId)
-        #con.enableLogging()
+        con.enableLogging(enableLogging)
         con.connect()
         con.registerAll(self.receiveMessage)
         self.emit(Signals.connectedTWS)

@@ -10,12 +10,12 @@ todo:
     executions display
     orders display
     plots
-    add icons to tabs
     add config dialog and session builder class setting
     add support for session seralization and deserialization
 """
 import sys
 
+from functools import partial
 from os import getpgrp, killpg
 from signal import SIGQUIT
 from subprocess import Popen, PIPE
@@ -48,25 +48,26 @@ class MainWindow(QMainWindow, Ui_MainWindow):
     def __init__(self, parent=None):
         QMainWindow.__init__(self, parent)
         self.setupUi(self)
+        self.setupLeftDock()
+        self.setupBottomDock()
+        self.createSession()
+        self.readSettings()
+
+    def setupLeftDock(self):
         self.accountDock = Dock('Account', self, QFrame)
         self.sessionDock = Dock('Session', self, SessionTree)
         self.tabifyDockWidget(self.sessionDock, self.accountDock)
 
-        self.stdoutDock = Dock('Output', self, OutputWidget,
-                               Qt.BottomDockWidgetArea)
-        self.stderrDock = Dock('Error', self, OutputWidget,
-                               Qt.BottomDockWidgetArea)
-        def makeShell(parent):
-            out = self.stdoutDock.widget()
-            err = self.stderrDock.widget()
-            return PythonShell(parent, stdout=out, stderr=err)
-
-        self.shellDock = Dock('Shell', self, makeShell,
-                              Qt.BottomDockWidgetArea)
+    def setupBottomDock(self):
+        area = Qt.BottomDockWidgetArea
+        self.stdoutDock = Dock('Output', self, OutputWidget, area)
+        self.stderrDock = Dock('Error', self, OutputWidget, area)
+        makeShell = partial(PythonShell,
+                            stdout=self.stdoutDock.widget(),
+                            stderr=self.stderrDock.widget())
+        self.shellDock = Dock('Shell', self, makeShell, area)
         self.tabifyDockWidget(self.shellDock, self.stdoutDock)
         self.tabifyDockWidget(self.stdoutDock, self.stderrDock)
-        self.createSession()
-        self.readSettings()
 
     def setWindowTitle(self, text):
         text = '%s 0.2 (alpha) (r%s)' % (text, svn_revision())
