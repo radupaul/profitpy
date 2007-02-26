@@ -28,7 +28,7 @@ class AccountDisplay(QFrame, Ui_AccountDisplay):
 
     @disabledUpdates('accountValuesTable')
     def on_accountValue(self, message):
-        """ signal handler for account messages
+        """ Signal handler for account messages.
 
         @param message message instance
         @return None

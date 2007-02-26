@@ -52,6 +52,16 @@
         </widget>
        </item>
        <item>
+        <widget class="QPushButton" name="colorButton" >
+         <property name="text" >
+          <string>Highlight</string>
+         </property>
+         <property name="icon" >
+          <iconset resource="profit.qrc" >:/images/icons/colorize.png</iconset>
+         </property>
+        </widget>
+       </item>
+       <item>
         <widget class="QPushButton" name="pauseButton" >
          <property name="text" >
           <string>Pause</string>
@@ -75,6 +85,12 @@
     <widget class="LocalTable" name="messageTable" >
      <property name="alternatingRowColors" >
       <bool>true</bool>
+     </property>
+     <property name="selectionMode" >
+      <enum>QAbstractItemView::SingleSelection</enum>
+     </property>
+     <property name="selectionBehavior" >
+      <enum>QAbstractItemView::SelectRows</enum>
      </property>
      <property name="gridStyle" >
       <enum>Qt::DotLine</enum>

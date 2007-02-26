@@ -7,6 +7,7 @@
 
 import sys
 from cPickle import PicklingError, UnpicklingError, dump, load
+from itertools import ifilter
 
 from PyQt4.QtCore import QObject, SIGNAL
 
@@ -49,6 +50,7 @@ class Session(QObject):
         self.messages = []
         self.savepoint = 0 # len messages
         self.filename = None
+        self.nextid = None
 
     def items(self):
         return [
@@ -87,7 +89,11 @@ class Session(QObject):
         con.enableLogging(enableLogging)
         con.connect()
         con.registerAll(self.receiveMessage)
+        con.register(self.on_nextValidId, 'NextValidId')
         self.emit(Signals.connectedTWS)
+
+    def on_nextValidId(self, message):
+        self.nextid = int(message.orderId)
 
     def receiveMessage(self, message):
         self.messages.append(message)
@@ -106,12 +112,19 @@ class Session(QObject):
     def requestOrders(self):
         connection = self.connection
         filt = ExecutionFilter()
-        #connection.reqExecutions(filt)
+        connection.reqExecutions(filt)
         connection.reqAllOpenOrders()
         connection.reqOpenOrders()
 
-        #contract = self.builder.contract('ASDF', secType='ASDF')
-        #connection.reqMktData(1, contract, '')
+        contract = self.builder.contract('ASDF', secType='ASDF')
+        connection.reqMktData(1, contract, '')
+        return
+
+    def testContract(self):
+        orderid = self.nextid
+
+        if orderid is None:
+            return False
 
         contract = self.builder.contract('AAPL')
         order = self.builder.order()
@@ -120,7 +133,18 @@ class Session(QObject):
         order.m_totalQuantity = '300'
         order.m_lmtPrice = contract.m_auxPrice = 78.5
         order.m_openClose = 'O'
-        connection.placeOrder(23423, contract, order)
+        self.connection.placeOrder(orderid, contract, order)
+        self.nextid += 1
+        return True
+
+    def resend(self, call, name):
+        match = lambda m:m.__type__.__name__ == name
+        for message in ifilter(match, self.mesages):
+            call(message)
+
+    def resendAll(self, call):
+        for message in iter(self.messages):
+            call(message)
 
     def save(self):
         status = False
@@ -142,7 +166,17 @@ class Session(QObject):
         return status
 
     def load(self, filename):
-        status = False
+        """ Restores session messages from file.
+
+        This function first yields the total number of messages
+        loaded, then yields the index of each message after it has
+        pumped the message thru the receiveMessage function.  This
+        oddness is used to support the QProgressDialog used in the
+        main window during session loading.
+
+        @param filename name of file from which to read messages.
+        @return None
+        """
         try:
             handle = open(filename, 'rb')
         except (IOError, ):
@@ -150,16 +184,16 @@ class Session(QObject):
         else:
             try:
                 messages = load(handle)
-                for message in messages:
+                yield len(messages)
+                for index, message in enumerate(messages):
                     self.receiveMessage(message)
+                    yield index
             except (UnpicklingError, ):
                 pass
             finally:
                 self.filename = filename
                 self.savepoint = len(messages)
                 handle.close()
-        return status
-
 
     # not yet needed
 

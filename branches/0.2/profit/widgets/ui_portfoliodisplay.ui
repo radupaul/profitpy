@@ -24,6 +24,12 @@
    </item>
    <item>
     <widget class="LocalTable" name="portfolioTable" >
+     <property name="selectionMode" >
+      <enum>QAbstractItemView::SingleSelection</enum>
+     </property>
+     <property name="selectionBehavior" >
+      <enum>QAbstractItemView::SelectRows</enum>
+     </property>
      <column>
       <property name="text" >
        <string>Symbol</string>
@@ -70,14 +76,14 @@
  </widget>
  <customwidgets>
   <customwidget>
-   <class>SearchBar</class>
-   <extends>QWidget</extends>
-   <header>searchbar.h</header>
-  </customwidget>
-  <customwidget>
    <class>LocalTable</class>
    <extends>QTableWidget</extends>
    <header>localtable.h</header>
+  </customwidget>
+  <customwidget>
+   <class>SearchBar</class>
+   <extends>QWidget</extends>
+   <header>searchbar.h</header>
   </customwidget>
  </customwidgets>
  <resources/>

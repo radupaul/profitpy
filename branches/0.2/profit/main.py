@@ -13,10 +13,10 @@
 #    plots
 #    add config dialog and session builder class setting
 #    add "new empty row" function to localtable; cleanup table displays
-#    add color selector to messages list
-#    add list to session object and append messages before emitting
-#    add support for session seralization and deserialization
 #    add prompts to close/quit if connected
+#    add position/value display to ticker table
+#    add setting saves for message colors
+#    message count high - use tree view in messages display
 
 from functools import partial
 from os import P_NOWAIT, getpgrp, killpg, popen, spawnvp
@@ -24,9 +24,10 @@ from signal import SIGQUIT
 from sys import argv
 
 from PyQt4.QtCore import Qt, pyqtSignature
-from PyQt4.QtGui import QFileDialog, QFrame, QMainWindow, QMessageBox
+from PyQt4.QtGui import QApplication, QFrame, QMainWindow
+from PyQt4.QtGui import QFileDialog, QMessageBox, QProgressDialog
 
-from profit.lib import Signals, Settings
+from profit.lib import Signals, Settings, nogc
 from profit.session import Session
 from profit.widgets import profit_rc
 from profit.widgets.dock import Dock
@@ -48,6 +49,9 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.setupBottomDock()
         self.createSession()
         self.readSettings()
+        if len(argv) > 1:
+            self.on_actionOpenSession_triggered(filename=argv[1])
+
 
     def setupLeftDock(self):
         self.accountDock = Dock('Account', self, QFrame)
@@ -76,13 +80,44 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
     @pyqtSignature('bool')
     def on_actionNewSession_triggered(self, checked=False):
+        if len(argv) > 1:
+            argv.remove(argv[1])
         pid = spawnvp(P_NOWAIT, argv[0], argv)
 
     @pyqtSignature('')
-    def on_actionOpenSession_triggered(self):
-        filename = QFileDialog.getOpenFileName(self)
+    def on_actionOpenSession_triggered(self, filename=None):
+        if not filename:
+            filename = QFileDialog.getOpenFileName(self)
         if filename:
-            self.session.load(str(filename))
+            showmsg = self.statusBar().showMessage
+            loadit = self.session.load(str(filename))
+            try:
+                count = loadit.next()
+                last = count - 1
+            except (StopIteration, ):
+                showmsg('Warning session not loaded from "%s"' % filename)
+            else:
+                progress = QProgressDialog(
+                    'Load Session Progress', 'Abort', 0, last, self
+                )
+                progress.setWindowModality(Qt.WindowModal)
+                progress.setWindowTitle('Loading...')
+                progress.show()
+                msgid = -1
+                for msgid in loadit:
+                    QApplication.processEvents()
+                    progress.setValue(msgid)
+                    if progress.wasCanceled():
+                        progress.close()
+                        break
+                if msgid == last:
+                    msg = 'Loaded %s messages from file "%s"'
+                    msg %= (count, filename)
+                else:
+                    msg = 'Load aborted; loaded %s messages of %s'
+                    msg %= (msgid+1, count)
+                showmsg(msg)
+
 
     @pyqtSignature('bool')
     def on_actionClearRecentMenu_triggered(self, checked=False):

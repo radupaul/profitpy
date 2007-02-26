@@ -183,7 +183,7 @@ def disabledUpdates(name):
             table = getattr(self, name)
             table.setUpdatesEnabled(False)
             try:
-                meth(*a, **b)
+                meth(self, *a, **b)
             finally:
                 table.setUpdatesEnabled(True)
         return method
