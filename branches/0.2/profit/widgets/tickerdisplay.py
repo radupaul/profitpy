@@ -23,6 +23,8 @@ fieldColumns = {
     }
 
 
+from itertools import ifilter
+
 class TickerDisplay(QFrame, Ui_TickerDisplay):
     def __init__(self, session, parent=None):
         QFrame.__init__(self, parent)
@@ -30,9 +32,24 @@ class TickerDisplay(QFrame, Ui_TickerDisplay):
         self.tickerItems = {}
         self.tickers = session.builder.tickers()
         self.tickerTable.verticalHeader().hide()
+        self.lastTickerMessages(session.messages)
         session.register(self.on_tickerPriceSize, 'TickPrice')
         session.register(self.on_tickerPriceSize, 'TickSize')
         session.register(self.on_updatePortfolio, 'UpdatePortfolio')
+
+    def lastTickerMessages(self, messages):
+        for symbol, tickerId in self.tickers.items():
+            for field in fieldColumns.keys():
+                def pred((time, message)):
+                    return message.__class__.__name__ in ('TickSize', 'TickPrice') and \
+                           message.field == field and \
+                           message.tickerId == tickerId
+                try:
+                    message = ifilter(pred, reversed(messages)).next()
+                except (StopIteration, ):
+                    pass
+                else:
+                    self.on_tickerPriceSize(message[1])
 
     def on_updatePortfolio(self, message):
         sym = message.contract.m_symbol
