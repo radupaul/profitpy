@@ -13,7 +13,7 @@ from PyQt4.QtGui import QPixmap, QSortFilterProxyModel
 
 from ib.opt.message import registry
 
-from profit.lib import Signals, nogc
+from profit.lib import Signals, Slots, nogc
 from profit.widgets.ui_messagedisplay import Ui_MessageDisplay
 
 
@@ -95,6 +95,25 @@ class MessagesTableModel(QAbstractTableModel):
         """
         self.session = session
         self.messages = session.messages
+        session.registerAll(self, Signals.layoutChanged)
+
+    def setPaused(self, paused):
+        """ Pauses or resumes signals emitted from this model.
+
+        @param paused if True, disconnects from session, otherwise reconnects
+        @return None
+        """
+        session = self.session
+        regcall = session.deregisterAll if paused else session.registerAll
+        regcall(self, Signals.layoutChanged)
+
+    def on_sessionMessage(self, message):
+        """ Signal handler for incoming messages.
+
+        @param message message instance
+        @return None
+        """
+        self.emit(Signals.layoutChanged)
 
     def data(self, index, role):
         """ Framework hook to determine data stored at index for given role.
@@ -150,25 +169,22 @@ class MessagesFilterModel(QSortFilterProxyModel):
     """ Filters messages from display.
 
     """
-    def __init__(self, session, types, parent=None):
+    def __init__(self, parent=None):
         """ Constructor.
 
-        @param session Session instance
-        @param types set of typenames for display
         @param parent ancestor object
         """
         QSortFilterProxyModel.__init__(self, parent)
-        self.session = session
-        self.messages = session.messages
-        self.types = types
 
-    def filterAcceptsRow(self, row, index):
+    def __filterAcceptsRow(self, row, index):
         """ Framework hook to control row visibility
 
         @param row row number as integer
         @param index QModelIndex instance (ignored)
         @return True if message should be displayed, False if not
         """
+        if self.stoprow and row > self.stoprow:
+            return False
         msg = self.messages[row][1]
         return msg.__class__.__name__ in self.types
 
@@ -195,12 +211,11 @@ class MessageDisplay(QFrame, Ui_MessageDisplay):
         """
         QFrame.__init__(self, parent)
         self.setupUi(self)
-        self.paused = False
         self.messageTable.verticalHeader().hide()
         self.setupModel(session)
         self.setupColorButton()
         self.setupDisplayButton()
-        session.registerAll(self.on_sessionMessage)
+        session.registerAll(self.messageTable, Slots.scrollToBottom)
 
     def colorIcon(self, color, width=10, height=10):
         """ Creates an icon filled with color.
@@ -252,13 +267,13 @@ class MessageDisplay(QFrame, Ui_MessageDisplay):
         allAction.setChecked(True)
 
     def setupModel(self, session):
+        self.session = session
         self.messages = session.messages
         self.brushMap = brushes = {}
         self.dataModel = MessagesTableModel(session, brushes, self)
         self.displayTypes = types = messageTypeNames()
-        self.proxyModel = MessagesFilterModel(session, types, self)
-        self.proxyModel.setSourceModel(self.dataModel)
-        self.messageTable.setModel(self.proxyModel)
+        self.proxyModel = None
+        self.messageTable.setModel(self.dataModel)
 
     def on_colorChange(self, action):
         """ Signal handler for color change actions.
@@ -271,7 +286,7 @@ class MessageDisplay(QFrame, Ui_MessageDisplay):
             action.color = color
             action.setIcon(self.colorIcon(color))
             self.brushMap[str(action.text())] = QBrush(color)
-            self.proxyModel.reset()
+            self.dataModel.reset()
 
     def on_displayChange(self, action):
         """ Signal handler for display types actions.
@@ -287,20 +302,59 @@ class MessageDisplay(QFrame, Ui_MessageDisplay):
             allAction.setChecked(False)
             self.displayTypes.clear()
             self.displayTypes.add(str(action.text()))
+            ## add proxy and one regex
+            if 0:
+                self.proxyModel = MessagesFilterModel(self)
+                self.proxyModel.setSourceModel(self.dataModel)
+                self.proxyModel.setFilterKeyColumn(2) # type
+                self.proxyModel.setFilterRegExp(action.text())
+                self.messageTable.setModel(self.proxyModel)
+
         elif allChecked and action is allAction:
             self.displayTypes.clear()
             self.displayTypes.update(messageTypeNames())
             for act in self.displayActions[1:]:
                 act.setChecked(False)
+            ## remove proxy
+            if 0:
+                self.messageTable.setModel(self.dataModel)
+                if self.proxyModel is not None:
+                    proxyModel = self.proxyModel
+                    proxyModel.deleteLater()
+                    self.proxyModel = None
+
         elif not allChecked and action is allAction:
             self.displayTypes.clear()
+            ## set proxy to no-match regex
+            if 0:
+                if self.proxyModel is not None:
+                    self.proxyModel.setFilterRegExp('foobar')
+                else:
+                    self.proxyModel = MessagesFilterModel(self)
+                    self.proxyModel.setSourceModel(self.dataModel)
+                    self.proxyModel.setFilterKeyColumn(2) # type
+                    self.proxyModel.setFilterRegExp('foobar')
+                    self.messageTable.setModel(self.proxyModel)
+
         elif not allChecked and action is not allAction:
             text = str(action.text())
             if actionChecked:
                 self.displayTypes.add(text)
+                if 0:
+                    ## add text to proxy regex
+                    self.proxyModel.setFilterRegExp(
+                        self.proxyModel.filterRegExp().pattern() + '|' + text
+                        )
             else:
                 self.displayTypes.discard(text)
-        self.proxyModel.reset()
+                ## remove text from proxy regex
+                if 0:
+                    pattern = self.proxyModel.filterRegExp().pattern()
+                    pattern.remove(text + '|')
+                    print '## pattern:', pattern
+                    self.proxyModel.setFilterRegExp(pattern)
+
+        self.dataModel.reset()
 
     @pyqtSignature('bool')
     def on_pauseButton_clicked(self, checked=False):
@@ -309,17 +363,6 @@ class MessageDisplay(QFrame, Ui_MessageDisplay):
         @param checked toggled state of button
         @return None
         """
-        self.paused = checked
+        self.dataModel.setPaused(checked)
         self.pauseButton.setText(self.pauseButtonText[checked])
         self.pauseButton.setIcon(QIcon(self.pauseButtonIcons[checked]))
-        self.on_sessionMessage(None)
-
-    def on_sessionMessage(self, message):
-        """ Signal handler for incoming messages.
-
-        @param message message instance
-        @return None
-        """
-        if not self.paused:
-            self.dataModel.emit(Signals.layoutChanged)
-            self.messageTable.scrollToBottom()

@@ -81,10 +81,21 @@ class Session(QObject):
     def register(self, call, name):
         self.connect(self, SIGNAL(name), call)
 
-    def registerAll(self, call):
+    def registerAll(self, obj, other=None):
         names = [typ.__name__ for typ in registry.values()]
         for name in names:
-            self.connect(self, SIGNAL(name), call)
+            if other is None:
+                self.connect(self, SIGNAL(name), obj)
+            else:
+                self.connect(self, SIGNAL(name), obj, other)
+
+    def deregisterAll(self, obj, other=None):
+        names = [typ.__name__ for typ in registry.values()]
+        for name in names:
+            if other is None:
+                self.disconnect(self, SIGNAL(name), obj)
+            else:
+                self.disconnect(self, SIGNAL(name), obj, other)
 
     def connectTWS(self, hostName, portNo, clientId, enableLogging=False):
         self.connection = con = ibConnection(hostName, portNo, clientId)

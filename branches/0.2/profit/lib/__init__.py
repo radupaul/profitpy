@@ -24,6 +24,13 @@ class Signals:
     triggered = SIGNAL('triggered()')
 
 
+class Slots:
+    """ Contains SLOT attributes for easy and consistent reference.
+
+    """
+    scrollToBottom = SLOT('scrollToBottom()')
+
+
 class Settings(QSettings):
     """ Convenient replacement for QSettings.
 
