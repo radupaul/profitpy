@@ -4,12 +4,14 @@
 # Copyright 2007 Troy Melhase <troy@gci.net>
 # Distributed under the terms of the GNU General Public License v2
 
+from itertools import ifilter
+
 from PyQt4.QtCore import Qt
 from PyQt4.QtGui import QFrame, QIcon
 
 from ib.ext.TickType import TickType
 
-from profit.lib import ValueTableItem
+from profit.lib import ValueTableItem, disabledUpdates
 from profit.widgets.ui_tickerdisplay import Ui_TickerDisplay
 
 
@@ -23,8 +25,6 @@ fieldColumns = {
     }
 
 
-from itertools import ifilter
-
 class TickerDisplay(QFrame, Ui_TickerDisplay):
     def __init__(self, session, parent=None):
         QFrame.__init__(self, parent)
@@ -32,24 +32,25 @@ class TickerDisplay(QFrame, Ui_TickerDisplay):
         self.tickerItems = {}
         self.tickers = session.builder.tickers()
         self.tickerTable.verticalHeader().hide()
-        self.lastTickerMessages(session.messages)
+        self.replayRecent(session.messages)
         session.register(self.on_tickerPriceSize, 'TickPrice')
         session.register(self.on_tickerPriceSize, 'TickSize')
         session.register(self.on_updatePortfolio, 'UpdatePortfolio')
 
-    def lastTickerMessages(self, messages):
+    def replayRecent(self, messages):
+        istickmsg = lambda m:m.__class__.__name__ in ('TickSize', 'TickPrice')
         for symbol, tickerId in self.tickers.items():
             for field in fieldColumns.keys():
                 def pred((time, message)):
-                    return message.__class__.__name__ in ('TickSize', 'TickPrice') and \
+                    return istickmsg(message) and \
                            message.field == field and \
                            message.tickerId == tickerId
                 try:
-                    message = ifilter(pred, reversed(messages)).next()
+                    time, message = ifilter(pred, reversed(messages)).next()
                 except (StopIteration, ):
                     pass
                 else:
-                    self.on_tickerPriceSize(message[1])
+                    self.on_tickerPriceSize(message)
 
     def on_updatePortfolio(self, message):
         sym = message.contract.m_symbol
@@ -62,16 +63,14 @@ class TickerDisplay(QFrame, Ui_TickerDisplay):
             items[1].setValue(message.position)
             items[2].setValue(message.marketValue)
 
+    @disabledUpdates('tickerTable')
     def on_tickerPriceSize(self, message):
         tid = message.tickerId
         table = self.tickerTable
-        table.setUpdatesEnabled(False)
-
         try:
             value = message.price
         except (AttributeError, ):
             value = message.size
-
         try:
             items = self.tickerItems[tid]
         except (KeyError, ):
@@ -89,7 +88,6 @@ class TickerDisplay(QFrame, Ui_TickerDisplay):
             table.sortItems(0)
             table.resizeColumnToContents(0)
             table.resizeRowsToContents()
-
         try:
             index = fieldColumns[message.field]
         except (KeyError, ):
@@ -97,5 +95,3 @@ class TickerDisplay(QFrame, Ui_TickerDisplay):
         else:
             items[index].setValue(value)
             table.resizeColumnToContents(index)
-
-        table.setUpdatesEnabled(True)

@@ -364,5 +364,10 @@ class MessageDisplay(QFrame, Ui_MessageDisplay):
         @return None
         """
         self.dataModel.setPaused(checked)
+        session = self.session
+        if checked:
+            session.deregisterAll(self.messageTable, Slots.scrollToBottom)
+        else:
+            session.registerAll(self.messageTable, Slots.scrollToBottom)
         self.pauseButton.setText(self.pauseButtonText[checked])
         self.pauseButton.setIcon(QIcon(self.pauseButtonIcons[checked]))
