@@ -6,8 +6,10 @@
 # Author: Troy Melhase <troy@gci.net>
 
 import sys
+
 from cPickle import PicklingError, UnpicklingError, dump, load
 from itertools import ifilter
+from time import time
 
 from PyQt4.QtCore import QObject, SIGNAL
 
@@ -96,7 +98,7 @@ class Session(QObject):
         self.nextid = int(message.orderId)
 
     def receiveMessage(self, message):
-        self.messages.append(message)
+        self.messages.append((time(), message))
         self.emit(SIGNAL(message.__class__.__name__), message)
 
     def requestTickers(self):
@@ -143,7 +145,7 @@ class Session(QObject):
             call(message)
 
     def resendAll(self, call):
-        for message in iter(self.messages):
+        for mtime, message in iter(self.messages):
             call(message)
 
     def save(self):
@@ -185,7 +187,7 @@ class Session(QObject):
             try:
                 messages = load(handle)
                 yield len(messages)
-                for index, message in enumerate(messages):
+                for index, (mtime, message) in enumerate(messages):
                     self.receiveMessage(message)
                     yield index
             except (UnpicklingError, ):

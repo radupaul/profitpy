@@ -13,13 +13,15 @@ class Signals:
     """ Contains SIGNAL attributes for easy and consistent reference.
 
     """
-    lastWindowClosed = SIGNAL('lastWindowClosed()')
-    sessionCreated = SIGNAL('sessionCreated(PyQt_PyObject)')
-    itemDoubleClicked = SIGNAL('itemDoubleClicked(QTreeWidgetItem *,int)')
-    connectedTWS = SIGNAL('connectedTWS')
-    disconnectedTWS = SIGNAL('disconnectedTWS')
     clicked = SIGNAL('clicked()')
+    connectedTWS = SIGNAL('connectedTWS')
     currentChanged = SIGNAL('currentChanged(int)')
+    disconnectedTWS = SIGNAL('disconnectedTWS')
+    itemDoubleClicked = SIGNAL('itemDoubleClicked(QTreeWidgetItem *,int)')
+    lastWindowClosed = SIGNAL('lastWindowClosed()')
+    layoutChanged = SIGNAL('layoutChanged()')
+    sessionCreated = SIGNAL('sessionCreated(PyQt_PyObject)')
+    triggered = SIGNAL('triggered()')
 
 
 class Settings(QSettings):

@@ -16,7 +16,6 @@
 #    add prompts to close/quit if connected
 #    add position/value display to ticker table
 #    add setting saves for message colors
-#    message count high - use tree view in messages display
 
 from functools import partial
 from os import P_NOWAIT, getpgrp, killpg, popen, spawnvp

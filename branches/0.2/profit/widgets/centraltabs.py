@@ -67,6 +67,7 @@ class CentralTabs(QTabWidget):
         index = self.currentIndex()
         widget = self.widget(index)
         self.removeTab(index)
+        widget.setAttribute(Qt.WA_DeleteOnClose)
         widget.close()
 
     def on_sessionCreated(self, session):
@@ -80,8 +81,8 @@ class CentralTabs(QTabWidget):
         try:
             call = getattr(self, 'on_session%sClicked' % value.capitalize())
             index = call(item)
-        except (AttributeError, TypeError, ):
-            pass
+        except (AttributeError, TypeError, ), exc:
+            print '## session item create exception:', exc
         else:
             self.setTabIcon(index, item.icon(0))
 
