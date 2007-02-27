@@ -78,8 +78,11 @@ class Session(QObject):
     def isModified(self):
         return len(self.messages) != self.savepoint
 
-    def register(self, call, name):
-        self.connect(self, SIGNAL(name), call)
+    def register(self, obj, name, other=None):
+        if other is None:
+            self.connect(self, SIGNAL(name), obj)
+        else:
+            self.connect(self, SIGNAL(name), obj, other)
 
     def registerAll(self, obj, other=None):
         names = [typ.__name__ for typ in registry.values()]

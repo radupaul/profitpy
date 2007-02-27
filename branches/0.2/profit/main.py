@@ -51,7 +51,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         if len(argv) > 1:
             self.on_actionOpenSession_triggered(filename=argv[1])
 
-
     def setupLeftDock(self):
         self.accountDock = Dock('Account', self, QFrame)
         self.sessionDock = Dock('Session', self, SessionTree)
@@ -139,6 +138,16 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
     @pyqtSignature('')
     def on_actionCloseSession_triggered(self):
+        if self.checkClose():
+            self.close()
+
+    @pyqtSignature('')
+    def on_actionQuit_triggered(self):
+        if self.checkClose():
+            self.groupClose()
+
+    def checkClose(self):
+        check = True
         if self.session.isModified:
             buttons = QMessageBox.Save|QMessageBox.Discard|QMessageBox.Cancel
             msg = QMessageBox.question(self, 'ProfitPy',
@@ -147,20 +156,14 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                                        buttons,
                                        QMessageBox.Save)
             if msg == QMessageBox.Discard:
-                self.close()
-            elif msg == QMessageBox.Cancel:
                 pass
+            elif msg == QMessageBox.Cancel:
+                check = False
             elif msg == QMessageBox.Save:
                 self.actionSaveSession.trigger()
-                ## this shouldn't work but it seems to... maybe should force
-                ## a disconnect just to be sure?  might want to check for
-                ## a connected session, too.
-                self.actionCloseSession.trigger()
-        else:
-            self.close()
+        return check
 
-    @pyqtSignature('')
-    def on_actionQuit_triggered(self):
+    def groupClose(self):
         try:
             killpg(getpgrp(), SIGQUIT)
         except (AttributeError, ):

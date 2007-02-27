@@ -32,6 +32,18 @@ class TickerDisplay(QFrame, Ui_TickerDisplay):
         self.tickerTable.verticalHeader().hide()
         session.register(self.on_tickerPriceSize, 'TickPrice')
         session.register(self.on_tickerPriceSize, 'TickSize')
+        session.register(self.on_updatePortfolio, 'UpdatePortfolio')
+
+    def on_updatePortfolio(self, message):
+        sym = message.contract.m_symbol
+        try:
+            tid = self.tickers[sym]
+            items = self.tickerItems[tid]
+        except (KeyError, ):
+            pass
+        else:
+            items[1].setValue(message.position)
+            items[2].setValue(message.marketValue)
 
     def on_tickerPriceSize(self, message):
         tid = message.tickerId
