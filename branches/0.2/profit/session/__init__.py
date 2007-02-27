@@ -97,6 +97,7 @@ class Session(QObject):
         return [
             ('account', ()),
             ('connection', ()),
+            ('executions', ()),
             ('messages', ()),
             ('orders', ()),
             ('portfolio', ()),
@@ -131,6 +132,20 @@ class Session(QObject):
             else:
                 self.connect(self, SIGNAL(name), obj, other)
 
+    def registerMeta(self, instance):
+        prefix = 'on_session_'
+        names = [n for n in dir(instance) if n.startswith('on_session_')]
+        for name in names:
+            keys = name[len(prefix):].split('_')
+            for key in keys:
+                self.register(getattr(instance, name), key)
+
+    def deregister(self, obj, name, other=None):
+        if other is None:
+            self.disconnect(self, SIGNAL(name), obj)
+        else:
+            self.disconnect(self, SIGNAL(name), obj, other)
+
     def deregisterAll(self, obj, other=None):
         names = [typ.__name__ for typ in registry.values()]
         for name in names:
@@ -138,6 +153,9 @@ class Session(QObject):
                 self.disconnect(self, SIGNAL(name), obj)
             else:
                 self.disconnect(self, SIGNAL(name), obj, other)
+
+    def deregisterMeta(self, instance):
+        raise NotImplementedError()
 
     def connectTWS(self, hostName, portNo, clientId, enableLogging=False):
         self.connection = con = ibConnection(hostName, portNo, clientId)
@@ -150,8 +168,8 @@ class Session(QObject):
     def on_nextValidId(self, message):
         self.nextid = int(message.orderId)
 
-    def receiveMessage(self, message):
-        self.messages.append((time(), message))
+    def receiveMessage(self, message, timefunc=time):
+        self.messages.append((timefunc(), message))
         self.emit(SIGNAL(message.__class__.__name__), message)
 
     def requestTickers(self):
@@ -191,15 +209,6 @@ class Session(QObject):
         self.connection.placeOrder(orderid, contract, order)
         self.nextid += 1
         return True
-
-    def resend(self, call, name):
-        match = lambda m:m.__type__.__name__ == name
-        for message in ifilter(match, self.mesages):
-            call(message)
-
-    def resendAll(self, call):
-        for mtime, message in iter(self.messages):
-            call(message)
 
     def save(self):
         status = False
@@ -241,7 +250,7 @@ class Session(QObject):
                 messages = load(handle)
                 yield len(messages)
                 for index, (mtime, message) in enumerate(messages):
-                    self.receiveMessage(message)
+                    self.receiveMessage(message, lambda:mtime)
                     yield index
             except (UnpicklingError, ):
                 pass
@@ -249,14 +258,4 @@ class Session(QObject):
                 self.filename = filename
                 self.savepoint = len(messages)
                 handle.close()
-
-    # not yet needed
-
-    #def deregister(self, call, key):
-    #    self.disconnect(self, SIGNAL(key), call)
-
-    #def deregisterAll(self, call):
-    #    names = [typ.__name__ for typ in registry.values()]
-    #    for name in names:
-    #        self.disconnect(self, SIGNAL(name), call)
 

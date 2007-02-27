@@ -9,8 +9,19 @@ from itertools import ifilter
 from PyQt4.QtCore import Qt
 from PyQt4.QtGui import QFrame, QIcon
 
-from profit.lib import ValueTableItem
+from profit.lib import ValueTableItem, disabledUpdates, nameIn
 from profit.widgets.ui_portfoliodisplay import Ui_PortfolioDisplay
+
+
+def replayPortfolio(messages, callback):
+    ismsg = nameIn('UpdatePortfolio')
+    symbols = (m.contract.m_symbol for t, m in messages if ismsg(m))
+    for symbol in set(symbols):
+        def pred((t, m)):
+            return ismsg(m) and m.contract.m_symbol==symbol
+        for time, message in ifilter(pred, reversed(messages)):
+            callback(message)
+            break
 
 
 class PortfolioDisplay(QFrame, Ui_PortfolioDisplay):
@@ -19,44 +30,22 @@ class PortfolioDisplay(QFrame, Ui_PortfolioDisplay):
         self.setupUi(self)
         self.portfolioItems = {}
         self.portfolioTable.verticalHeader().hide()
-        self.replayRecent(session.messages)
-        session.register(self.on_portfolioValue, 'UpdatePortfolio')
+        replayPortfolio(session.messages, self.on_session_UpdatePortfolio)
+        session.registerMeta(self)
 
-    def replayRecent(self, messages):
-        isportmsg = lambda m:m.__class__.__name__ == 'UpdatePortfolio'
-        symbols = (m.contract.m_symbol for t, m in messages if isportmsg(m))
-        for symbol in symbols:
-            def pred((time, message)):
-                return isportmsg(message) and \
-                       message.contract.m_symbol == symbol
-            try:
-                time, message = ifilter(pred, reversed(messages)).next()
-            except (StopIteration, ):
-                pass
-            else:
-                self.on_portfolioValue(message)
-
-    def on_portfolioValue(self, message):
+    @disabledUpdates('portfolioTable')
+    def on_session_UpdatePortfolio(self, message):
         sym = message.contract.m_symbol
         table = self.portfolioTable
-        columnCount = table.columnCount()
-        table.setUpdatesEnabled(False)
-
         try:
             items = self.portfolioItems[sym]
         except (KeyError, ):
-            row = table.rowCount()
-            table.insertRow(row)
-            items = self.portfolioItems[sym] = \
-                    [ValueTableItem() for i in range(columnCount)]
+            items = self.portfolioItems[sym] = table.newItemsRow()
             items[0].setSymbol(sym)
             for item in items[1:]:
                 item.setValueAlign()
-            for col, item in enumerate(items):
-                table.setItem(row, col, item)
-
-
-        items[0].setText(sym)
+            table.resizeColumnToContents(0)
+            table.resizeRowsToContents()
         items[1].setValue(message.position)
         items[2].setValue(message.marketPrice)
         items[3].setValue(message.marketValue)
@@ -64,7 +53,6 @@ class PortfolioDisplay(QFrame, Ui_PortfolioDisplay):
         items[5].setValue(message.unrealizedPNL)
         items[6].setValue(message.realizedPNL)
         items[7].setText(message.accountName)
+        for col in range(table.columnCount()):
+            table.resizeColumnToContents(col)
 
-        for i in range(columnCount):
-            table.resizeColumnToContents(i)
-        table.setUpdatesEnabled(True)

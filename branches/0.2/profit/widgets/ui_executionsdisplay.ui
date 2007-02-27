@@ -1,6 +1,6 @@
 <ui version="4.0" >
- <class>PortfolioDisplay</class>
- <widget class="QWidget" name="PortfolioDisplay" >
+ <class>ExecutionsDisplay</class>
+ <widget class="QWidget" name="ExecutionsDisplay" >
   <property name="geometry" >
    <rect>
     <x>0</x>
@@ -23,7 +23,7 @@
     <widget class="SearchBar" native="1" name="searchBar" />
    </item>
    <item>
-    <widget class="LocalTable" name="portfolioTable" >
+    <widget class="LocalTable" name="executionsTable" >
      <property name="selectionMode" >
       <enum>QAbstractItemView::SingleSelection</enum>
      </property>
@@ -35,42 +35,52 @@
      </property>
      <column>
       <property name="text" >
-       <string>Symbol</string>
+       <string>Action</string>
       </property>
      </column>
      <column>
       <property name="text" >
-       <string>Position</string>
+       <string>Quantity</string>
       </property>
      </column>
      <column>
       <property name="text" >
-       <string>Market Price</string>
+       <string>Underlying</string>
       </property>
      </column>
      <column>
       <property name="text" >
-       <string>Market Value</string>
+       <string>Price</string>
       </property>
      </column>
      <column>
       <property name="text" >
-       <string>Average Cost</string>
+       <string>Currency</string>
       </property>
      </column>
      <column>
       <property name="text" >
-       <string>Unrealized Profit</string>
+       <string>Exchange</string>
       </property>
      </column>
      <column>
       <property name="text" >
-       <string>Realized Profit</string>
+       <string>Date</string>
       </property>
      </column>
      <column>
       <property name="text" >
-       <string>Account</string>
+       <string>Time</string>
+      </property>
+     </column>
+     <column>
+      <property name="text" >
+       <string>Id</string>
+      </property>
+     </column>
+     <column>
+      <property name="text" >
+       <string>Order Reference</string>
       </property>
      </column>
     </widget>

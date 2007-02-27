@@ -7,6 +7,7 @@
 
 from PyQt4.QtGui import QTableWidget
 
+from profit.lib import ValueTableItem
 
 class LocalTable(QTableWidget):
     def __init__(self, parent=None):
@@ -23,3 +24,14 @@ class LocalTable(QTableWidget):
         for i in xrange(self.rowCount()):
             items = [self.item(i, c) for c in cols]
             yield items
+
+    def newItemsRow(self):
+        """
+
+        """
+        row = self.rowCount()
+        self.insertRow(row)
+        items = [ValueTableItem() for col in range(self.columnCount())]
+        for col, item in enumerate(items):
+            self.setItem(row, col, item)
+        return items

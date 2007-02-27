@@ -8,13 +8,12 @@
 # todo:
 #    search bar for tickers, orders, account, etc.
 #    complete account dock widget
-#    executions display
+#    executions display (orderId, contract, execution)
 #    orders display
 #    plots
 #    add config dialog and session builder class setting
-#    add "new empty row" function to localtable; cleanup table displays
+#    extend account display key to (key, currency)
 #    add prompts to close/quit if connected
-#    add position/value display to ticker table
 #    add setting saves for message colors
 
 from functools import partial
@@ -114,7 +113,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 else:
                     msg = 'Load aborted; loaded %s messages of %s'
                     msg %= (msgid+1, count)
-                showmsg(msg)
+                showmsg(msg, 5000)
 
 
     @pyqtSignature('bool')

@@ -11,7 +11,8 @@ from PyQt4.QtGui import QFrame, QIcon
 
 from ib.ext.TickType import TickType
 
-from profit.lib import ValueTableItem, disabledUpdates
+from profit.lib import ValueTableItem, disabledUpdates, nameIn
+from profit.widgets.portfoliodisplay import replayPortfolio
 from profit.widgets.ui_tickerdisplay import Ui_TickerDisplay
 
 
@@ -25,34 +26,31 @@ fieldColumns = {
     }
 
 
+def replayTick(messages, tickers, callback):
+    ismsg = nameIn('TickSize', 'TickPrice')
+    for symbol, tickerId in tickers.items():
+        for field in fieldColumns.keys():
+            def pred((t, m)):
+                return ismsg(m) and m.field==field and m.tickerId==tickerId
+            for time, message in ifilter(pred, reversed(messages)):
+                callback(message)
+                break
+
+
 class TickerDisplay(QFrame, Ui_TickerDisplay):
     def __init__(self, session, parent=None):
         QFrame.__init__(self, parent)
         self.setupUi(self)
         self.tickerItems = {}
-        self.tickers = session.builder.tickers()
+        self.tickers = tickers = session.builder.tickers()
         self.tickerTable.verticalHeader().hide()
-        self.replayRecent(session.messages)
-        session.register(self.on_tickerPriceSize, 'TickPrice')
-        session.register(self.on_tickerPriceSize, 'TickSize')
-        session.register(self.on_updatePortfolio, 'UpdatePortfolio')
+        replayTick(session.messages, tickers,
+                   self.on_session_TickPrice_TickSize)
+        replayPortfolio(session.messages, self.on_session_UpdatePortfolio)
+        session.registerMeta(self)
 
-    def replayRecent(self, messages):
-        istickmsg = lambda m:m.__class__.__name__ in ('TickSize', 'TickPrice')
-        for symbol, tickerId in self.tickers.items():
-            for field in fieldColumns.keys():
-                def pred((time, message)):
-                    return istickmsg(message) and \
-                           message.field == field and \
-                           message.tickerId == tickerId
-                try:
-                    time, message = ifilter(pred, reversed(messages)).next()
-                except (StopIteration, ):
-                    pass
-                else:
-                    self.on_tickerPriceSize(message)
-
-    def on_updatePortfolio(self, message):
+    @disabledUpdates('tickerTable')
+    def on_session_UpdatePortfolio(self, message):
         sym = message.contract.m_symbol
         try:
             tid = self.tickers[sym]
@@ -64,7 +62,7 @@ class TickerDisplay(QFrame, Ui_TickerDisplay):
             items[2].setValue(message.marketValue)
 
     @disabledUpdates('tickerTable')
-    def on_tickerPriceSize(self, message):
+    def on_session_TickPrice_TickSize(self, message):
         tid = message.tickerId
         table = self.tickerTable
         try:
@@ -74,17 +72,11 @@ class TickerDisplay(QFrame, Ui_TickerDisplay):
         try:
             items = self.tickerItems[tid]
         except (KeyError, ):
+            items = self.tickerItems[tid] = table.newItemsRow()
             sym = dict([(b, a) for a, b in self.tickers.items()])[tid]
-            columnCount = table.columnCount()
-            row = table.rowCount()
-            table.insertRow(row)
-            items = self.tickerItems[tid] = \
-                    [ValueTableItem() for i in range(columnCount)]
             items[0].setSymbol(sym)
             for item in items[1:]:
                 item.setValueAlign()
-            for col, item in enumerate(items):
-                table.setItem(row, col, item)
             table.sortItems(0)
             table.resizeColumnToContents(0)
             table.resizeRowsToContents()

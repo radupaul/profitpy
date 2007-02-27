@@ -11,6 +11,7 @@ from PyQt4.QtGui import QIcon, QPushButton, QTabWidget, QWidget
 from profit.lib import Signals
 from profit.widgets.accountdisplay import AccountDisplay
 from profit.widgets.connectiondisplay import ConnectionDisplay
+from profit.widgets.executionsdisplay import ExecutionsDisplay
 from profit.widgets.messagedisplay import MessageDisplay
 from profit.widgets.orderdisplay import OrderDisplay
 from profit.widgets.portfoliodisplay import PortfolioDisplay
@@ -99,7 +100,8 @@ class CentralTabs(QTabWidget):
 
 
     on_sessionAccountClicked = tabWidgetMethod(AccountDisplay)
-    on_sessionOrdersClicked = tabWidgetMethod(OrderDisplay)
-    on_sessionTickersClicked = tabWidgetMethod(TickerDisplay)
+    on_sessionExecutionsClicked = tabWidgetMethod(ExecutionsDisplay)
     on_sessionMessagesClicked = tabWidgetMethod(MessageDisplay)
+    on_sessionOrdersClicked = tabWidgetMethod(OrderDisplay)
     on_sessionPortfolioClicked = tabWidgetMethod(PortfolioDisplay)
+    on_sessionTickersClicked = tabWidgetMethod(TickerDisplay)

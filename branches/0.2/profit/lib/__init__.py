@@ -6,7 +6,7 @@
 # Author: Troy Melhase <troy@gci.net>
 
 from PyQt4.QtCore import QPoint, QSettings, QSize, QVariant, Qt, SIGNAL, SLOT
-from PyQt4.QtGui import QBrush, QColor, QIcon, QTableWidgetItem
+from PyQt4.QtGui import QBrush, QColor, QIcon, QPixmap, QTableWidgetItem
 
 
 class Signals:
@@ -21,6 +21,7 @@ class Signals:
     lastWindowClosed = SIGNAL('lastWindowClosed()')
     layoutChanged = SIGNAL('layoutChanged()')
     sessionCreated = SIGNAL('sessionCreated(PyQt_PyObject)')
+    timeout = SIGNAL('timeout()')
     triggered = SIGNAL('triggered()')
 
 
@@ -150,6 +151,10 @@ class ValueTableItem(QTableWidgetItem):
         @return None
         """
         icon = QIcon(':images/tickers/%s.png' % (symbol.lower(), ))
+        if icon.pixmap(16,16).isNull():
+            pixmap = QPixmap(16, 16)
+            pixmap.fill(QColor(0, 0, 0, 0))
+            icon = QIcon(pixmap)
         self.setIcon(icon)
         self.setText(symbol)
 
@@ -160,6 +165,7 @@ class ValueTableItem(QTableWidgetItem):
         @return None
         """
         self.setTextAlignment(alignment)
+
 
 ##
 # Set for the nogc function/function decorator.
@@ -197,3 +203,12 @@ def disabledUpdates(name):
                 table.setUpdatesEnabled(True)
         return method
     return disableDeco
+
+
+def nameIn(*names):
+    def check(obj):
+        try:
+            return obj.__class__.__name__ in names
+        except (AttributeError, ):
+            return False
+    return check
