@@ -16,10 +16,48 @@ from PyQt4.QtCore import QObject, SIGNAL
 from ib.ext.Contract import Contract
 from ib.ext.ExecutionFilter import ExecutionFilter
 from ib.ext.Order import Order
+from ib.ext.TickType import TickType
+
 from ib.opt import ibConnection
 from ib.opt.message import registry
 
 from profit.lib import Signals
+
+
+class TickerCollection(QObject):
+    def __init__(self, session):
+        QObject.__init__(self)
+        self.tickers = {}
+        session.register(self.on_tickPriceSize, 'TickPrice')
+        session.register(self.on_tickPriceSize, 'TickSize')
+
+    def on_tickPriceSize(self, message):
+        try:
+            tickerdata = self.tickers[message.tickerId]
+        except (KeyError, ):
+            tickerdata = self.tickers[message.tickerId] = TickerData()
+        try:
+            value = message.price
+        except (AttributeError, ):
+            value = message.size
+        try:
+            seq = tickerdata.series[message.field]
+        except (KeyError, ):
+            seq = tickerdata.series[message.field] = []
+        seq.append(value)
+
+
+class TickerData(object):
+    def __init__(self):
+        self.series = {
+            TickType.BID_SIZE:[],
+            TickType.BID:[],
+            TickType.ASK_SIZE:[],
+            TickType.ASK:[],
+            TickType.LAST_SIZE:[],
+            TickType.LAST:[],
+            }
+
 
 
 class SessionBuilder(object):
@@ -53,6 +91,7 @@ class Session(QObject):
         self.savepoint = 0 # len messages
         self.filename = None
         self.nextid = None
+        self.tickerCollection = TickerCollection(self)
 
     def items(self):
         return [

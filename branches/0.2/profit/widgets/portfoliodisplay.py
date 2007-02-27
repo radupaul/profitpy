@@ -4,6 +4,8 @@
 # Copyright 2007 Troy Melhase <troy@gci.net>
 # Distributed under the terms of the GNU General Public License v2
 
+from itertools import ifilter
+
 from PyQt4.QtCore import Qt
 from PyQt4.QtGui import QFrame, QIcon
 
@@ -17,7 +19,22 @@ class PortfolioDisplay(QFrame, Ui_PortfolioDisplay):
         self.setupUi(self)
         self.portfolioItems = {}
         self.portfolioTable.verticalHeader().hide()
+        self.replayRecent(session.messages)
         session.register(self.on_portfolioValue, 'UpdatePortfolio')
+
+    def replayRecent(self, messages):
+        isportmsg = lambda m:m.__class__.__name__ == 'UpdatePortfolio'
+        symbols = (m.contract.m_symbol for t, m in messages if isportmsg(m))
+        for symbol in symbols:
+            def pred((time, message)):
+                return isportmsg(message) and \
+                       message.contract.m_symbol == symbol
+            try:
+                time, message = ifilter(pred, reversed(messages)).next()
+            except (StopIteration, ):
+                pass
+            else:
+                self.on_portfolioValue(message)
 
     def on_portfolioValue(self, message):
         sym = message.contract.m_symbol
