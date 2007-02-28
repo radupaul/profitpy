@@ -23,6 +23,8 @@ class Signals:
     sessionCreated = SIGNAL('sessionCreated(PyQt_PyObject)')
     timeout = SIGNAL('timeout()')
     triggered = SIGNAL('triggered()')
+    symbolPlotFull = SIGNAL('symbolPlotFull')
+    symbolPlotLine = SIGNAL('symbolPlotLine')
 
 
 class Slots:

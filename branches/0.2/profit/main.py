@@ -8,11 +8,16 @@
 # todo:
 #    search bar for tickers, orders, account, etc.
 #    complete account dock widget
-#    plots
+#    account display plots
+#    ticker plots
 #    add config dialog and session builder class setting
 #    add prompts to close/quit if connected
 #    add setting saves for message colors
 #    add clear/append option to load session (on existing messages)
+#    modify account display to use model/table view
+#    modify orders display to use model/tree view
+#    add check and read of startup .py script
+#    write session collector script
 
 from functools import partial
 from os import P_NOWAIT, getpgrp, killpg, popen, spawnvp
@@ -120,7 +125,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                     msg %= (msgid+1, count)
             self.statusBar().showMessage(msg, 5000)
 
-
     @pyqtSignature('bool')
     def on_actionClearRecentMenu_triggered(self, checked=False):
         print '### clear recent menu', checked
@@ -138,7 +142,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         if filename:
             self.session.filename = str(filename)
             self.actionSaveSession.trigger()
-
 
     @pyqtSignature('')
     def on_actionCloseSession_triggered(self):

@@ -11,7 +11,7 @@ from PyQt4.QtGui import QFrame, QIcon
 
 from ib.ext.TickType import TickType
 
-from profit.lib import ValueTableItem, disabledUpdates, nameIn
+from profit.lib import Signals, ValueTableItem, disabledUpdates, nameIn
 from profit.widgets.portfoliodisplay import replayPortfolio
 from profit.widgets.ui_tickerdisplay import Ui_TickerDisplay
 
@@ -49,6 +49,18 @@ class TickerDisplay(QFrame, Ui_TickerDisplay):
         replayPortfolio(session.messages, self.on_session_UpdatePortfolio)
         session.registerMeta(self)
 
+    def on_tickerTable_doubleClicked(self, index):
+        if not index.isValid():
+            return
+        col = index.column()
+        row = index.row()
+        item = self.tickerTable.item(row, 0)
+        if (0 <= col <= 2):
+            self.emit(Signals.symbolPlotFull, item)
+        elif  (2 < col < 9):
+            arg = col
+            self.emit(Signals.symbolPlotLine, item, arg)
+
     @disabledUpdates('tickerTable')
     def on_session_UpdatePortfolio(self, message):
         sym = message.contract.m_symbol
@@ -75,10 +87,11 @@ class TickerDisplay(QFrame, Ui_TickerDisplay):
             items = self.tickerItems[tid] = table.newItemsRow()
             sym = dict([(b, a) for a, b in self.tickers.items()])[tid]
             items[0].setSymbol(sym)
+            items[0].tickerId = tid
             for item in items[1:]:
                 item.setValueAlign()
             table.sortItems(0)
-            table.resizeColumnToContents(0)
+            table.resizeColumnsToContents()
             table.resizeRowsToContents()
         try:
             index = fieldColumns[message.field]
@@ -86,4 +99,4 @@ class TickerDisplay(QFrame, Ui_TickerDisplay):
             pass
         else:
             items[index].setValue(value)
-            table.resizeColumnToContents(index)
+            #table.resizeColumnToContents(index)
