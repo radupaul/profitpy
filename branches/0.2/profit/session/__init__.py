@@ -193,13 +193,13 @@ class Session(QObject):
         connection.reqMktData(1, contract, '')
         return
 
-    def testContract(self):
+    def testContract(self, symbol='AAPL'):
         orderid = self.nextid
 
         if orderid is None:
             return False
 
-        contract = self.builder.contract('AAPL')
+        contract = self.builder.contract(symbol)
         order = self.builder.order()
         order.m_action = 'SELL'
         order.m_orderType = 'MKT'

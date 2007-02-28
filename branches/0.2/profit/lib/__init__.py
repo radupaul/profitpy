@@ -166,6 +166,8 @@ class ValueTableItem(QTableWidgetItem):
         """
         self.setTextAlignment(alignment)
 
+    def setText(self, text):
+        QTableWidgetItem.setText(self, str(text))
 
 ##
 # Set for the nogc function/function decorator.

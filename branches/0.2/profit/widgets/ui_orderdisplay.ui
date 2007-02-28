@@ -47,7 +47,7 @@
      </column>
      <column>
       <property name="text" >
-       <string>Active</string>
+       <string>Status</string>
       </property>
      </column>
      <column>
@@ -83,6 +83,31 @@
      <column>
       <property name="text" >
        <string>Remaining</string>
+      </property>
+     </column>
+     <column>
+      <property name="text" >
+       <string>Average Fill Price</string>
+      </property>
+     </column>
+     <column>
+      <property name="text" >
+       <string>Last Fill Price</string>
+      </property>
+     </column>
+     <column>
+      <property name="text" >
+       <string>Parent Id</string>
+      </property>
+     </column>
+     <column>
+      <property name="text" >
+       <string>Client Id</string>
+      </property>
+     </column>
+     <column>
+      <property name="text" >
+       <string>Perm Id</string>
       </property>
      </column>
     </widget>

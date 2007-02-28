@@ -8,13 +8,11 @@
 # todo:
 #    search bar for tickers, orders, account, etc.
 #    complete account dock widget
-#    executions display (orderId, contract, execution)
-#    orders display
 #    plots
 #    add config dialog and session builder class setting
-#    extend account display key to (key, currency)
 #    add prompts to close/quit if connected
 #    add setting saves for message colors
+#    add clear/append option to load session (on existing messages)
 
 from functools import partial
 from os import P_NOWAIT, getpgrp, killpg, popen, spawnvp

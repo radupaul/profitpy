@@ -11,7 +11,7 @@ from time import strftime, strptime
 from PyQt4.QtCore import QEventLoop, QTimer, Qt
 from PyQt4.QtGui import QApplication, QFrame, QIcon
 
-from profit.lib import Signals, ValueTableItem, disabledUpdates, nameIn, nogc
+from profit.lib import disabledUpdates, nameIn, nogc
 from profit.widgets.ui_executionsdisplay import Ui_ExecutionsDisplay
 
 

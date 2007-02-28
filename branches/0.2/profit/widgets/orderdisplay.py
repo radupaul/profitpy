@@ -4,11 +4,22 @@
 # Copyright 2007 Troy Melhase <troy@gci.net>
 # Distributed under the terms of the GNU General Public License v2
 
+from itertools import ifilter
+
 from PyQt4.QtCore import Qt
 from PyQt4.QtGui import QFrame
 
-from profit.lib import ValueTableItem
+from profit.lib import disabledUpdates, nameIn
 from profit.widgets.ui_orderdisplay import Ui_OrderDisplay
+
+
+def replayOrders(messages, obj):
+    ismsg = nameIn('OpenOrder', 'OrderStatus')
+    def pred((t, m)):
+        return ismsg(m)
+    for time, message in ifilter(pred, messages):
+        call = getattr(obj, 'on_session_%s' % message.__class__.__name__)
+        call(message)
 
 
 class OrderDisplay(QFrame, Ui_OrderDisplay):
@@ -18,56 +29,49 @@ class OrderDisplay(QFrame, Ui_OrderDisplay):
         self.setupUi(self)
         self.orderItems = {}
         self.orderTable.verticalHeader().hide()
-        session.register(self.on_openOrder, 'OpenOrder')
-        session.register(self.on_orderStatus, 'OrderStatus')
-        session.register(self.on_contractDetails, 'ContractDetails')
-        session.register(self.on_execution, 'Execution')
+        replayOrders(session.messages, self)
+        session.registerMeta(self)
 
-
-    def on_openOrder(self, message):
-        print '#### open order message', message
-        return
-        key, value, currency, accountName = \
-             message.key, message.value, message.currency, message.accountName
-        table = self.accountValuesTable
-        columnCount = table.columnCount()
-        table.setUpdatesEnabled(False)
+    @disabledUpdates('orderTable')
+    def on_session_OrderStatus(self, message):
+        orderId = message.orderId
         try:
-            items = self.accountItems[key]
+            items = self.orderItems[orderId]
         except (KeyError, ):
-            row = table.rowCount()
-            table.insertRow(row)
-            items = self.accountItems[key] = \
-                    [AccountTableItem() for i in range(columnCount)]
-            items[0].setText(key)
-            for col, item in enumerate(items):
-                table.setItem(row, col, item)
-            table.sortItems(0)
-        items[1].setValue(value)
-        items[2].setText(currency)
-        items[3].setText(accountName)
-        for i in range(columnCount):
-            table.resizeColumnToContents(i)
-        table.setUpdatesEnabled(True)
+            print '### warning:  order items not found on status for', orderId
+            return
+        table = self.orderTable
+        items[3].setText(message.status)
+        items[9].setText(message.filled)
+        items[10].setText(message.remaining)
+        items[11].setText(message.avgFillPrice)
+        items[12].setText(message.lastFillPrice)
+        items[13].setText(message.parentId)
+        items[14].setText(message.clientId)
+        items[15].setText(message.permId)
+        table.resizeColumnsToContents()
 
-
-    def on_orderStatus(self, message):
-        print '### order status message', message
-        class __message:
-            __slots__ = ('orderId', 'message', 'filled', 'remaining',
-                     'permId', 'parentId', 'lastFillPrice',
-                     'avgFillPrice', 'clientId')
-
-    def on_contractDetails(self, message):
-        print '#### contract details', message
-        class detail:
-            __slots__ = ('details', )
-
-    def on_execution(self, message):
-        print '#### execution', message
-        class __message:
-            __slots__ = ('orderId', 'contract', 'details', )
-
-
-class OrderTableItem(ValueTableItem):
-    pass
+    @disabledUpdates('orderTable')
+    def on_session_OpenOrder(self, message):
+        table = self.orderTable
+        contract = message.contract
+        order = message.order
+        orderId = order.m_orderId
+        try:
+            items = self.orderItems[orderId]
+        except (KeyError, ):
+            items = self.orderItems[orderId] = table.newItemsRow()
+            table.resizeRowsToContents()
+        items[0].setText(str(orderId))
+        items[1].setSymbol(contract.m_symbol) # OK
+        items[2].setText(order.m_totalQuantity) # OK
+        #items[3].setText('') # active
+        items[4].setText(order.m_action) # OK
+        items[5].setText(order.m_orderType) # OK
+        items[6].setText(order.m_lmtPrice) # OK
+        items[7].setText(order.m_auxPrice) # OK
+        items[8].setText(order.m_openClose) # OK
+        #items[9].setText('') # filled
+        #items[10].setText('') # remaining
+        for col in [0, 2, 6, 7, 9, 10, 11, 12, 13, 14, 15]:
+            items[col].setValueAlign()
