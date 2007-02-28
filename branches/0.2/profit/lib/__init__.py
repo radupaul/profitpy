@@ -102,6 +102,8 @@ def importItem(name):
     mod = importName(str.join('.', modname))
     return getattr(mod, itemname)
 
+##
+valueAlign = Qt.AlignRight | Qt.AlignVCenter
 
 class ValueTableItem(QTableWidgetItem):
     """ Table item that changes colors based on value changes.
@@ -150,15 +152,11 @@ class ValueTableItem(QTableWidgetItem):
         @param symbol ticker symbol as string
         @return None
         """
-        icon = QIcon(':images/tickers/%s.png' % (symbol.lower(), ))
-        if icon.pixmap(16,16).isNull():
-            pixmap = QPixmap(16, 16)
-            pixmap.fill(QColor(0, 0, 0, 0))
-            icon = QIcon(pixmap)
+        icon = symbolIcon(symbol)
         self.setIcon(icon)
         self.setText(symbol)
 
-    def setValueAlign(self, alignment=Qt.AlignRight|Qt.AlignVCenter):
+    def setValueAlign(self, alignment=valueAlign):
         """ Sets the text alignment of this item.
 
         @param alignment Qt alignment flags
@@ -168,6 +166,21 @@ class ValueTableItem(QTableWidgetItem):
 
     def setText(self, text):
         QTableWidgetItem.setText(self, str(text))
+
+
+def symbolIcon(symbol):
+    """ Icon for a symbol.
+
+    @param symbol name of symbol
+    @return QIcon instance; transparent but valid if symbol icon not found
+    """
+    icon = QIcon(':images/tickers/%s.png' % (symbol.lower(), ))
+    if icon.pixmap(16,16).isNull():
+        pixmap = QPixmap(16, 16)
+        pixmap.fill(QColor(0, 0, 0, 0))
+        icon = QIcon(pixmap)
+    return icon
+
 
 ##
 # Set for the nogc function/function decorator.

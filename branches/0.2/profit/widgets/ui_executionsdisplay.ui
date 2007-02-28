@@ -23,7 +23,10 @@
     <widget class="SearchBar" native="1" name="searchBar" />
    </item>
    <item>
-    <widget class="LocalTable" name="executionsTable" >
+    <widget class="QTableView" name="executionsTable" >
+     <property name="alternatingRowColors" >
+      <bool>true</bool>
+     </property>
      <property name="selectionMode" >
       <enum>QAbstractItemView::SingleSelection</enum>
      </property>
@@ -33,66 +36,11 @@
      <property name="gridStyle" >
       <enum>Qt::DotLine</enum>
      </property>
-     <column>
-      <property name="text" >
-       <string>Action</string>
-      </property>
-     </column>
-     <column>
-      <property name="text" >
-       <string>Quantity</string>
-      </property>
-     </column>
-     <column>
-      <property name="text" >
-       <string>Underlying</string>
-      </property>
-     </column>
-     <column>
-      <property name="text" >
-       <string>Price</string>
-      </property>
-     </column>
-     <column>
-      <property name="text" >
-       <string>Currency</string>
-      </property>
-     </column>
-     <column>
-      <property name="text" >
-       <string>Exchange</string>
-      </property>
-     </column>
-     <column>
-      <property name="text" >
-       <string>Date</string>
-      </property>
-     </column>
-     <column>
-      <property name="text" >
-       <string>Time</string>
-      </property>
-     </column>
-     <column>
-      <property name="text" >
-       <string>Id</string>
-      </property>
-     </column>
-     <column>
-      <property name="text" >
-       <string>Order Reference</string>
-      </property>
-     </column>
     </widget>
    </item>
   </layout>
  </widget>
  <customwidgets>
-  <customwidget>
-   <class>LocalTable</class>
-   <extends>QTableWidget</extends>
-   <header>localtable.h</header>
-  </customwidget>
   <customwidget>
    <class>SearchBar</class>
    <extends>QWidget</extends>

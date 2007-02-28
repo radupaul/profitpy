@@ -267,6 +267,11 @@ class MessageDisplay(QFrame, Ui_MessageDisplay):
         allAction.setChecked(True)
 
     def setupModel(self, session):
+        """ Configures this instance for a session.
+
+        @param session Session instance
+        @return None
+        """
         self.session = session
         self.messages = session.messages
         self.brushMap = brushes = {}

@@ -41,8 +41,7 @@ class SessionTreeBasicItem(SessionTreeItem):
 
     """
     iconNameMap = {
-        ## disabled to test standardIcon lookup
-        ## 'account':'identity',
+        'account':'identity',
         'connection':'server',
         'messages':'view_text',
         'orders':'klipper_dock',
