@@ -84,34 +84,41 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         if not filename:
             filename = QFileDialog.getOpenFileName(self)
         if filename:
-            showmsg = self.statusBar().showMessage
-            loadit = self.session.load(str(filename))
+            processEvents = QApplication.processEvents
+            progress = QProgressDialog(self)
+            progress.setLabelText('Reading session file.')
+            progress.setCancelButtonText('Abort')
+            progress.setWindowModality(Qt.WindowModal)
+            progress.setWindowTitle('Reading...')
+            self.show()
+            processEvents()
+            progress.show()
+            processEvents()
             try:
+                loadit = self.session.load(str(filename))
                 count = loadit.next()
                 last = count - 1
             except (StopIteration, ):
-                showmsg('Warning session not loaded from "%s"' % filename)
+                msg = 'Warning session not loaded from "%s"' % filename
+                progress.close()
             else:
-                progress = QProgressDialog(
-                    'Load Session Progress', 'Abort', 0, last, self
-                )
-                progress.setWindowModality(Qt.WindowModal)
+                progress.setLabelText('Loading session messages.')
                 progress.setWindowTitle('Loading...')
-                progress.show()
+                progress.setMaximum(last)
                 msgid = -1
                 for msgid in loadit:
-                    QApplication.processEvents()
+                    processEvents()
                     progress.setValue(msgid)
                     if progress.wasCanceled():
                         progress.close()
                         break
                 if msgid == last:
-                    msg = 'Loaded %s messages from file "%s"'
+                    msg = 'Loaded all %s messages from file "%s".'
                     msg %= (count, filename)
                 else:
-                    msg = 'Load aborted; loaded %s messages of %s'
+                    msg = 'Load aborted; loaded %s messages of %s.'
                     msg %= (msgid+1, count)
-                showmsg(msg, 5000)
+            self.statusBar().showMessage(msg, 5000)
 
 
     @pyqtSignature('bool')
