@@ -278,8 +278,6 @@ class PythonShell(QTextEdit):
         shelld['device'] = self.topLevelWidget()
         shelld['session'] = session
         shelld.update(session)
-        #for ((tid, tsym,), tobj,) in session.builder.tickers():
-        #    shelld[tsym] = tobj
 
     def onGuiComplete(self):
         """ onGuiComplete() -> a callback (not a slot) for startup-complete-ness

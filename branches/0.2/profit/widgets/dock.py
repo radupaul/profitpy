@@ -8,14 +8,30 @@
 from PyQt4.QtCore import Qt
 from PyQt4.QtGui import QDockWidget
 
+
 class Dock(QDockWidget):
-    def __init__(self, title, parent, child, area=Qt.LeftDockWidgetArea,
-                 auto=True):
+    """ Simplified interface to QDockWidget.
+
+    """
+    def __init__(self, title, parent, childType,
+                 area=Qt.LeftDockWidgetArea,
+                 allowedAreas=Qt.AllDockWidgetAreas,
+                 autoAddDock=True,
+                 features=QDockWidget.DockWidgetMovable|\
+                          QDockWidget.DockWidgetFloatable):
+        """ Constructor.
+
+        @param title dock title
+        @param parent ancestor widget
+        @param childType callable to produce child widget
+        @param area default dock area
+        @param allowedAreas dock widget allowed areas
+        @param autoAddDock if True, dock widget is added to parent
+        @param features dock widget features
+        """
         QDockWidget.__init__(self, title, parent)
-        self.setAllowedAreas(Qt.AllDockWidgetAreas)
-        self.setFeatures(self.DockWidgetMovable | self.DockWidgetFloatable)
-        if callable(child):
-            child = child(self)
-        self.setWidget(child)
-        if auto:
+        self.setAllowedAreas(allowedAreas)
+        self.setFeatures(features)
+        self.setWidget(childType(self))
+        if autoAddDock:
             parent.addDockWidget(area, self)

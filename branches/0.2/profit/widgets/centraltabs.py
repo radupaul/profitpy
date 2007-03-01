@@ -6,7 +6,7 @@
 # Author: Troy Melhase <troy@gci.net>
 
 from PyQt4.QtCore import Qt, pyqtSignature
-from PyQt4.QtGui import QIcon, QPushButton, QTabWidget, QWidget
+from PyQt4.QtGui import QAction, QIcon, QPushButton, QTabWidget
 
 from profit.lib import Signals
 from profit.widgets.accountdisplay import AccountDisplay
@@ -14,17 +14,15 @@ from profit.widgets.connectiondisplay import ConnectionDisplay
 from profit.widgets.executionsdisplay import ExecutionsDisplay
 from profit.widgets.messagedisplay import MessageDisplay
 from profit.widgets.orderdisplay import OrderDisplay
-from profit.widgets.plot import Plot
+from profit.widgets.plotdisplay import PlotDisplay
 from profit.widgets.portfoliodisplay import PortfolioDisplay
 from profit.widgets.tickerdisplay import TickerDisplay
-
 
 
 def tabWidgetMethod(cls):
     def method(self, item):
         widget = cls(self.session, self)
         index = self.addTab(widget, item.text(0))
-        self.setCurrentIndex(index)
         return index
     return method
 
@@ -34,36 +32,37 @@ class CloseTabButton(QPushButton):
         QPushButton.__init__(self, parent)
         self.setIcon(QIcon(':images/icons/tab_remove.png'))
         self.setFlat(True)
+        triggerAction = QAction(self)
+        triggerAction.setShortcut('Ctrl+W')
+        self.addAction(triggerAction)
+        self.connect(triggerAction, Signals.triggered, self.click)
 
 
 class CentralTabs(QTabWidget):
     def __init__(self, parent=None):
         QTabWidget.__init__(self, parent)
-        self.connect(self.window(), Signals.itemDoubleClicked,
-                     self.on_itemClicked)
         self.session = None
         self.closeTabButton = closeTabButton = CloseTabButton(self)
         self.setCornerWidget(closeTabButton, Qt.TopRightCorner)
+        window = self.window()
         connect = self.connect
-        connect(closeTabButton, Signals.clicked, self.on_closeTabButton_clicked)
         connect(self, Signals.currentChanged, self.on_currentChanged)
-        connect(self.window(), Signals.sessionCreated, self.on_created)
+        connect(window, Signals.sessionCreated, self.on_sessionCreated)
+        connect(window, Signals.itemDoubleClicked, self.on_itemClicked)
+        connect(closeTabButton, Signals.clicked,
+                self.on_closeTabButton_clicked)
 
-    def canClose(self, index):
-        title = str(self.tabText(self.currentIndex()))
-        if title in ('connection', ):
-            if self.session and self.session.isConnected:
-                return False
-        return True
+    def canCloseCurrent(self):
+        try:
+            return self.currentWidget().canClose()
+        except (AttributeError, ):
+            return True
 
-    def on_currentChanged(self, index):
-        self.closeTabButton.setEnabled(self.canClose(index))
+    def on_currentChanged(self, index=None):
+        self.closeTabButton.setEnabled(self.canCloseCurrent())
 
-    def on_connectedTWS(self):
-        self.on_currentChanged(self.currentIndex())
-
-    def on_disconnectedTWS(self):
-        self.closeTabButton.setEnabled(True)
+    def on_statusTWS(self):
+        self.on_currentChanged()
 
     @pyqtSignature('')
     def on_closeTabButton_clicked(self):
@@ -72,33 +71,38 @@ class CentralTabs(QTabWidget):
         self.removeTab(index)
         widget.setAttribute(Qt.WA_DeleteOnClose)
         widget.close()
+        self.on_currentChanged()
 
-    def on_created(self, session):
+    def on_sessionCreated(self, session):
         self.session = session
         connect = self.connect
-        connect(session, Signals.connectedTWS, self.on_connectedTWS)
-        connect(session, Signals.disconnectedTWS, self.on_disconnectedTWS)
+        connect(session, Signals.connectedTWS, self.on_statusTWS)
+        connect(session, Signals.disconnectedTWS, self.on_statusTWS)
 
     def on_itemClicked(self, item, col):
-        value = str(item.text(0))
         try:
-            call = getattr(self, 'on_%sClicked' % value.lower())
-            index = call(item)
-        except (AttributeError, TypeError, ), exc:
-            print '## session item create exception:', exc
-        else:
-            self.setTabIcon(index, item.icon(0))
+            self.on_symbolClicked(item=None, symbol=item.text(0),
+                                  tickerId=item.tickerId,
+                                  icon=item.icon(0))
+        except (AttributeError, ):
+            text = str(item.text(0))
+            try:
+                call = getattr(self, 'on_%sClicked' % text.lower())
+                index = call(item)
+            except (AttributeError, TypeError, ), exc:
+                print '## session item create exception:', exc
+            else:
+                self.setCurrentIndex(index)
+                self.setTabIcon(index, item.icon(0))
 
     def on_connectionClicked(self, item):
-        items = [(str(self.tabText(i)), i) for i in range(self.count())]
-        items = dict(items)
-        text = str(item.text(0))
-        if text in items:
-            idx = items[text]
-        else:
-            idx = self.addTab(ConnectionDisplay(self.session, self), text)
-        self.setCurrentIndex(idx)
-        return idx
+        try:
+            index = self.connectionTabIndex
+        except (AttributeError, ):
+            text = item.text(0)
+            widget = ConnectionDisplay(self.session, self)
+            index = self.connectionTabIndex = self.addTab(widget, text)
+        return index
 
     on_accountClicked = tabWidgetMethod(AccountDisplay)
     on_executionsClicked = tabWidgetMethod(ExecutionsDisplay)
@@ -109,15 +113,17 @@ class CentralTabs(QTabWidget):
     def on_tickersClicked(self, item):
         widget = TickerDisplay(self.session, self)
         index = self.addTab(widget, item.text(0))
-        self.setCurrentIndex(index)
-        self.connect(widget, Signals.symbolPlotFull, self.on_symbolPlot)
-        self.connect(widget, Signals.symbolPlotLine, self.on_symbolPlot)
+        self.connect(widget, Signals.tickerClicked, self.on_symbolClicked)
         return index
 
-    def on_symbolPlot(self, item, *args):
-        symbol = str(item.text())
-        tickerId = item.tickerId
-        widget = Plot(self.session, symbol, tickerId, self, *args)
+    def on_symbolClicked(self, item, index=None, symbol=None,
+                         tickerId=None, icon=None, *args):
+        if item is not None:
+            symbol = str(item.text())
+            tickerId = item.tickerId
+            icon = item.icon()
+        widget = PlotDisplay(self)
+        widget.setSession(self.session, tickerId, *args)
         index = self.addTab(widget, symbol)
-        self.setTabIcon(index, item.icon())
+        self.setTabIcon(index, icon)
         self.setCurrentIndex(index)

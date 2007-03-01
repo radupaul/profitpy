@@ -71,19 +71,22 @@ class SessionTreeTickerItem(SessionTreeItem):
     """ Item type that maps its first column text to a ticker icon.
 
     """
-    def __init__(self, parent, *strings):
+    def __init__(self, parent, tickerId, *strings):
         """ Constructor.
 
         @param parent tree widget or other tree item
+        @param tickerId ticker id as integer
         @param *strings strings for column(s) text
         """
         SessionTreeItem.__init__(self, parent, *strings)
+        self.tickerId = tickerId
         try:
-            icon = QIcon(':images/tickers/%s.png' % strings[0].lower())
-            self.setIcon(0, icon)
+            symbol = strings[0]
         except (IndexError, ):
-            pass
-
+            symbol = None
+        else:
+            self.setIcon(0, QIcon(':images/tickers/%s.png' % symbol.lower()))
+        self.symbol = symbol
 
 class SessionTree(QWidget, Ui_SessionTree):
     """ Tree view of a Session object.
@@ -113,12 +116,14 @@ class SessionTree(QWidget, Ui_SessionTree):
         self.session = session
         tree = self.treeWidget
         tree.clear()
-        cls = SessionTreeBasicItem
         for key, values in session.items():
-            item = cls(tree, key)
+            item = SessionTreeBasicItem(tree, key)
             for value in values:
-                subcls = cls if key != 'tickers' else SessionTreeTickerItem
-                subcls(item, value)
+                if key == 'tickers':
+                    tickerId = values[value]
+                    subitem = SessionTreeTickerItem(item, tickerId, value)
+                else:
+                    subitem = SessionTreeBasicItem(item, value)
 
     def on_itemDoubleClicked(self, item, col):
         """ signal handler called when an item is double clicked

@@ -5,14 +5,14 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>453</width>
-    <height>343</height>
+    <width>691</width>
+    <height>678</height>
    </rect>
   </property>
   <property name="windowTitle" >
    <string>Form</string>
   </property>
-  <layout class="QVBoxLayout" >
+  <layout class="QHBoxLayout" >
    <property name="margin" >
     <number>9</number>
    </property>
@@ -20,7 +20,43 @@
     <number>6</number>
    </property>
    <item>
-    <widget class="QwtPlot" name="plotWidget" />
+    <widget class="QSplitter" name="plotSplitter" >
+     <property name="orientation" >
+      <enum>Qt::Horizontal</enum>
+     </property>
+     <widget class="QTreeWidget" name="controlTree" >
+      <property name="alternatingRowColors" >
+       <bool>true</bool>
+      </property>
+      <property name="uniformRowHeights" >
+       <bool>true</bool>
+      </property>
+      <property name="animated" >
+       <bool>true</bool>
+      </property>
+      <property name="allColumnsShowFocus" >
+       <bool>true</bool>
+      </property>
+      <property name="columnCount" >
+       <number>1</number>
+      </property>
+      <column>
+       <property name="text" >
+        <string>Item</string>
+       </property>
+      </column>
+     </widget>
+     <widget class="QwtPlot" name="plotWidget" >
+      <property name="sizePolicy" >
+       <sizepolicy>
+        <hsizetype>5</hsizetype>
+        <vsizetype>5</vsizetype>
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
+     </widget>
+    </widget>
    </item>
   </layout>
  </widget>

@@ -23,8 +23,9 @@ class Signals:
     sessionCreated = SIGNAL('sessionCreated(PyQt_PyObject)')
     timeout = SIGNAL('timeout()')
     triggered = SIGNAL('triggered()')
-    symbolPlotFull = SIGNAL('symbolPlotFull')
-    symbolPlotLine = SIGNAL('symbolPlotLine')
+    splitterMoved = SIGNAL('splitterMoved(int, int)')
+    tickerClicked = SIGNAL('tickerClicked')
+
 
 
 class Slots:
@@ -32,6 +33,7 @@ class Slots:
 
     """
     scrollToBottom = SLOT('scrollToBottom()')
+    expandItem = SLOT('expandItem(const QTreeWidgetItem *)')
 
 
 class Settings(QSettings):
@@ -168,6 +170,19 @@ class ValueTableItem(QTableWidgetItem):
 
     def setText(self, text):
         QTableWidgetItem.setText(self, str(text))
+
+
+def colorIcon(color, width=10, height=10):
+    """ Creates an icon filled with specified color.
+
+    @param color QColor instance
+    @param width width of icon in pixels
+    @param height of icon in pixels
+    @return QIcon instance
+    """
+    pixmap = QPixmap(width, height)
+    pixmap.fill(color)
+    return QIcon(pixmap)
 
 
 def symbolIcon(symbol):

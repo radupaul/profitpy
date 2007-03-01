@@ -84,6 +84,9 @@ class ConnectionDisplay(QFrame, Ui_ConnectionWidget):
             self.setEnabledButtons(True, False)
             self.setNextClientId()
 
+    def canClose(self):
+        return not (self.session and self.session.isConnected)
+
     def clientId(self):
         try:
             clientId = int(self.clientIdEdit.text())

@@ -13,7 +13,7 @@ from PyQt4.QtGui import QPixmap, QSortFilterProxyModel
 
 from ib.opt.message import registry
 
-from profit.lib import Signals, Slots, nogc
+from profit.lib import Signals, Slots, colorIcon, nogc
 from profit.widgets.ui_messagedisplay import Ui_MessageDisplay
 
 
@@ -217,18 +217,6 @@ class MessageDisplay(QFrame, Ui_MessageDisplay):
         self.setupDisplayButton()
         session.registerAll(self.messageTable, Slots.scrollToBottom)
 
-    def colorIcon(self, color, width=10, height=10):
-        """ Creates an icon filled with color.
-
-        @param color QColor instance
-        @param width width of icon in pixels
-        @param height of icon in pixels
-        @return QIcon instance
-        """
-        pixmap = QPixmap(width, height)
-        pixmap.fill(color)
-        return QIcon(pixmap)
-
     def setupColorButton(self):
         """ Configures the color highlight button.
 
@@ -241,7 +229,7 @@ class MessageDisplay(QFrame, Ui_MessageDisplay):
             [pop.addAction(v) for v in sorted(self.colorTypes)]
         for action in actions:
             action.color = color = QColor(0,0,0)
-            action.setIcon(self.colorIcon(color))
+            action.setIcon(colorIcon(color))
             target = nogc(partial(self.on_colorChange, action=action))
             self.connect(action, Signals.triggered, target)
         self.brushMap.update(
@@ -289,7 +277,7 @@ class MessageDisplay(QFrame, Ui_MessageDisplay):
         color = QColorDialog.getColor(action.color, self)
         if color.isValid():
             action.color = color
-            action.setIcon(self.colorIcon(color))
+            action.setIcon(colorIcon(color))
             self.brushMap[str(action.text())] = QBrush(color)
             self.dataModel.reset()
 

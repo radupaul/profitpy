@@ -26,9 +26,9 @@ fieldColumns = {
     }
 
 
-def replayTick(messages, tickers, callback):
+def replayTick(messages, symbols, callback):
     ismsg = nameIn('TickSize', 'TickPrice')
-    for symbol, tickerId in tickers.items():
+    for symbol, tickerId in symbols.items():
         for field in fieldColumns.keys():
             def pred((t, m)):
                 return ismsg(m) and m.field==field and m.tickerId==tickerId
@@ -42,9 +42,9 @@ class TickerDisplay(QFrame, Ui_TickerDisplay):
         QFrame.__init__(self, parent)
         self.setupUi(self)
         self.tickerItems = {}
-        self.tickers = tickers = session.builder.tickers()
+        self.symbols = symbols = session.builder.symbols()
         self.tickerTable.verticalHeader().hide()
-        replayTick(session.messages, tickers,
+        replayTick(session.messages, symbols,
                    self.on_session_TickPrice_TickSize)
         replayPortfolio(session.messages, self.on_session_UpdatePortfolio)
         session.registerMeta(self)
@@ -56,16 +56,15 @@ class TickerDisplay(QFrame, Ui_TickerDisplay):
         row = index.row()
         item = self.tickerTable.item(row, 0)
         if (0 <= col <= 2):
-            self.emit(Signals.symbolPlotFull, item)
+            self.emit(Signals.tickerClicked, item)
         elif  (2 < col < 9):
-            arg = col
-            self.emit(Signals.symbolPlotLine, item, arg)
+            self.emit(Signals.tickerClicked, item, col)
 
     @disabledUpdates('tickerTable')
     def on_session_UpdatePortfolio(self, message):
         sym = message.contract.m_symbol
         try:
-            tid = self.tickers[sym]
+            tid = self.symbols[sym]
             items = self.tickerItems[tid]
         except (KeyError, ):
             pass
@@ -85,7 +84,7 @@ class TickerDisplay(QFrame, Ui_TickerDisplay):
             items = self.tickerItems[tid]
         except (KeyError, ):
             items = self.tickerItems[tid] = table.newItemsRow()
-            sym = dict([(b, a) for a, b in self.tickers.items()])[tid]
+            sym = dict([(b, a) for a, b in self.symbols.items()])[tid]
             items[0].setSymbol(sym)
             items[0].tickerId = tid
             for item in items[1:]:

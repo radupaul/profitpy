@@ -24,18 +24,59 @@ from ib.opt.message import registry
 from profit.lib import Signals
 
 
+class Index(list):
+    def __init__(self, name):
+        list.__init__(self)
+        self.name = name
+
+
+class Series(list):
+    def __init__(self):
+        list.__init__(self)
+        self.indexes = [
+            Index('MCAD'),
+            Index('EMA-20'),
+            Index('SMA-50'),
+            Index('KAMA'),
+        ]
+
+    def append(self, value):
+        list.append(self, value)
+        for index in self.indexes:
+            index.append(value)
+
+
+class Ticker(object):
+    def __init__(self):
+        self.series = {}
+
+
 class TickerCollection(QObject):
+    """
+
+    """
     def __init__(self, session):
         QObject.__init__(self)
         self.tickers = {}
-        session.register(self.on_tickPriceSize, 'TickPrice')
-        session.register(self.on_tickPriceSize, 'TickSize')
+        for tid in session.builder.symbols().values():
+            self[tid] = self.newTicker()
+        session.registerMeta(self)
 
-    def on_tickPriceSize(self, message):
+    def __getitem__(self, name):
+        return self.tickers[name]
+
+    def __setitem__(self, name, value):
+        self.tickers[name] = value
+
+    @classmethod
+    def newTicker(cls):
+        return Ticker()
+
+    def on_session_TickPrice_TickSize(self, message):
         try:
             tickerdata = self.tickers[message.tickerId]
         except (KeyError, ):
-            tickerdata = self.tickers[message.tickerId] = TickerData()
+            tickerdata = self.tickers[message.tickerId] = self.newTicker()
         try:
             value = message.price
         except (AttributeError, ):
@@ -43,28 +84,15 @@ class TickerCollection(QObject):
         try:
             seq = tickerdata.series[message.field]
         except (KeyError, ):
-            seq = tickerdata.series[message.field] = []
+            seq = tickerdata.series[message.field] = Series()
         seq.append(value)
-
-
-class TickerData(object):
-    def __init__(self):
-        self.series = {
-            TickType.BID_SIZE:[],
-            TickType.BID:[],
-            TickType.ASK_SIZE:[],
-            TickType.ASK:[],
-            TickType.LAST_SIZE:[],
-            TickType.LAST:[],
-            }
-
 
 
 class SessionBuilder(object):
     def strategy(self):
         return None
 
-    def tickers(self):
+    def symbols(self):
         return {'AAPL':100, 'EBAY':101, 'NVDA':102}
 
     def contract(self, symbol, secType='STK', exchange='SMART',
@@ -102,7 +130,7 @@ class Session(QObject):
             ('orders', ()),
             ('portfolio', ()),
             ('strategy', ()),
-            ('tickers', self.builder.tickers()),
+            ('tickers', self.builder.symbols()),
             ]
 
     def disconnectTWS(self):
@@ -174,7 +202,7 @@ class Session(QObject):
 
     def requestTickers(self):
         connection = self.connection
-        for sym, tid in self.builder.tickers().items():
+        for sym, tid in self.builder.symbols().items():
             contract = self.builder.contract(sym)
             connection.reqMktData(tid, contract, '')
             connection.reqMktDepth(tid, contract, 1)
