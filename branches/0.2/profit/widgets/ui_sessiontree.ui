@@ -20,24 +20,13 @@
     <number>0</number>
    </property>
    <item>
-    <widget class="QTreeWidget" name="treeWidget" >
+    <widget class="QTreeView" name="treeView" >
      <property name="frameShape" >
       <enum>QFrame::NoFrame</enum>
      </property>
-     <property name="rootIsDecorated" >
-      <bool>true</bool>
+     <property name="frameShadow" >
+      <enum>QFrame::Plain</enum>
      </property>
-     <property name="animated" >
-      <bool>true</bool>
-     </property>
-     <property name="columnCount" >
-      <number>1</number>
-     </property>
-     <column>
-      <property name="text" >
-       <string>Object</string>
-      </property>
-     </column>
     </widget>
    </item>
   </layout>

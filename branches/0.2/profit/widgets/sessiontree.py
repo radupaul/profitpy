@@ -5,39 +5,16 @@
 # Distributed under the terms of the GNU General Public License v2
 # Author: Troy Melhase <troy@gci.net>
 
-from PyQt4.QtGui import QIcon, QTreeWidgetItem, QWidget
+from PyQt4.QtCore import QVariant
+from PyQt4.QtGui import (QApplication, QIcon, QStandardItem,
+                         QStandardItemModel, QWidget)
 
-from profit.lib import Signals
+from profit.lib import Signals, tickerIdRole
 from profit.widgets.ui_sessiontree import Ui_SessionTree
 
 
-class SessionTreeItem(QTreeWidgetItem):
-    """ Shared implementation for SessionTree items
-
-    """
-    def __init__(self, parent, *strings):
-        """ Constructor.
-
-        @param parent tree widget or other tree item
-        @param *strings strings for column(s) text
-        """
-        QTreeWidgetItem.__init__(self, parent, list(strings))
-
-    def setIcon(self, column, icon):
-        """ Overloaded to adjust item size when an icon is set
-
-        @param column integer
-        @param icon QIcon instance
-        @return None
-        """
-        QTreeWidgetItem.setIcon(self, column, icon)
-        sizehint = self.sizeHint(0)
-        sizehint.setHeight(20)
-        self.setSizeHint(0, sizehint)
-
-
-class SessionTreeBasicItem(SessionTreeItem):
-    """ Item type that maps SessionTree keys to icons.
+class SessionTreeItem(QStandardItem):
+    """ Session tree item.
 
     """
     iconNameMap = {
@@ -50,43 +27,75 @@ class SessionTreeBasicItem(SessionTreeItem):
         'tickers':'view_detailed',
     }
 
-    def __init__(self, parent, *strings):
+    def __init__(self, text):
         """ Constructor.
 
-        @param parent tree widget or other tree item
-        @param *strings strings for column(s) text
+        @param text value for item display
         """
-        SessionTreeItem.__init__(self, parent, *strings)
-        try:
-            name = self.iconNameMap[strings[0]]
-            icon = QIcon(':images/icons/%s.png' % name)
-        except (KeyError, IndexError, ):
-            style = parent.style()
-            icon = style.standardIcon(style.SP_DirIcon)
-        self.setIcon(0, icon)
+        QStandardItem.__init__(self, text)
+        self.setEditable(False)
+        self.setIcon(self.lookupIcon(text))
+        hint = self.sizeHint()
+        hint.setHeight(20)
+        self.setSizeHint(hint)
 
+    def lookupIcon(self, key):
+        """ Locates icon for given key.
+
+        @param key item text
+        @return QIcon instance
+        """
+        try:
+            name = self.iconNameMap[key]
+            icon = QIcon(':images/icons/%s.png' % name)
+        except (KeyError, ):
+            style = QApplication.style()
+            icon = style.standardIcon(style.SP_DirIcon)
+        return icon
 
 
 class SessionTreeTickerItem(SessionTreeItem):
-    """ Item type that maps its first column text to a ticker icon.
+    """ Specalized session tree item for ticker symbols.
 
     """
-    def __init__(self, parent, tickerId, *strings):
+    def lookupIcon(self, key):
+        """ Locates icon for given key.
+
+        @param key ticker symbol
+        @return QIcon instance
+        """
+        return QIcon(':images/tickers/%s.png' % key.lower())
+
+    def setTickerId(self, tickerId):
+        """ Sets item data for ticker id.
+
+        @param tickerId id for ticker as integer
+        @return None
+        """
+        self.setData(QVariant(tickerId), tickerIdRole)
+
+
+class SessionTreeModel(QStandardItemModel):
+    def __init__(self, session, parent=None):
         """ Constructor.
 
-        @param parent tree widget or other tree item
-        @param tickerId ticker id as integer
-        @param *strings strings for column(s) text
+        @param session Session instance
+        @param parent ancestor object
         """
-        SessionTreeItem.__init__(self, parent, *strings)
-        self.tickerId = tickerId
-        try:
-            symbol = strings[0]
-        except (IndexError, ):
-            symbol = None
-        else:
-            self.setIcon(0, QIcon(':images/tickers/%s.png' % symbol.lower()))
-        self.symbol = symbol
+        QStandardItemModel.__init__(self)
+        self.session = session
+        root = self.invisibleRootItem()
+        for key, values in session.items():
+            item = SessionTreeItem(key)
+            root.appendRow(item)
+            for value in values:
+                if key == 'tickers':
+                    subitem = SessionTreeTickerItem(value)
+                    subitem.setTickerId(values[value])
+                else:
+                    subitem = SessionTreeItem(value)
+                item.appendRow(subitem)
+
 
 class SessionTree(QWidget, Ui_SessionTree):
     """ Tree view of a Session object.
@@ -99,36 +108,21 @@ class SessionTree(QWidget, Ui_SessionTree):
         """
         QWidget.__init__(self, parent)
         self.setupUi(self)
-        window = self.window()
-        tree = self.treeWidget
         connect = self.connect
+        tree = self.treeView
+        window = self.window()
         connect(window, Signals.sessionCreated, self.on_sessionCreated)
-        connect(tree, Signals.itemDoubleClicked, self.on_itemDoubleClicked)
-        connect(tree, Signals.itemDoubleClicked,
-                window, Signals.itemDoubleClicked)
+        connect(tree, Signals.modelDoubleClicked,
+                window, Signals.modelDoubleClicked)
+        tree.header().hide()
+        tree.setAnimated(True)
 
     def on_sessionCreated(self, session):
-        """ signal handler called when new Session object is created
+        """ Signal handler called when new Session object is created.
 
         @param session new Session instance
         @return None
         """
         self.session = session
-        tree = self.treeWidget
-        tree.clear()
-        for key, values in session.items():
-            item = SessionTreeBasicItem(tree, key)
-            for value in values:
-                if key == 'tickers':
-                    tickerId = values[value]
-                    subitem = SessionTreeTickerItem(item, tickerId, value)
-                else:
-                    subitem = SessionTreeBasicItem(item, value)
-
-    def on_itemDoubleClicked(self, item, col):
-        """ signal handler called when an item is double clicked
-
-        @param item tree view item
-        @param col column number clicked
-        @return None
-        """
+        self.dataModel = SessionTreeModel(session, self)
+        self.treeView.setModel(self.dataModel)

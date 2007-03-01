@@ -18,6 +18,7 @@ class Signals:
     currentChanged = SIGNAL('currentChanged(int)')
     disconnectedTWS = SIGNAL('disconnectedTWS')
     itemDoubleClicked = SIGNAL('itemDoubleClicked(QTreeWidgetItem *,int)')
+    modelDoubleClicked = SIGNAL('doubleClicked (const QModelIndex &)')
     lastWindowClosed = SIGNAL('lastWindowClosed()')
     layoutChanged = SIGNAL('layoutChanged()')
     sessionCreated = SIGNAL('sessionCreated(PyQt_PyObject)')
@@ -25,7 +26,6 @@ class Signals:
     triggered = SIGNAL('triggered()')
     splitterMoved = SIGNAL('splitterMoved(int, int)')
     tickerClicked = SIGNAL('tickerClicked')
-
 
 
 class Slots:
@@ -106,8 +106,14 @@ def importItem(name):
     mod = importName(str.join('.', modname))
     return getattr(mod, itemname)
 
+
+##
+tickerIdRole = Qt.UserRole + 32
+
+
 ##
 valueAlign = Qt.AlignRight | Qt.AlignVCenter
+
 
 class ValueTableItem(QTableWidgetItem):
     """ Table item that changes colors based on value changes.

@@ -8,7 +8,7 @@
 from PyQt4.QtCore import Qt, pyqtSignature
 from PyQt4.QtGui import QAction, QIcon, QPushButton, QTabWidget
 
-from profit.lib import Signals
+from profit.lib import Signals, tickerIdRole
 from profit.widgets.accountdisplay import AccountDisplay
 from profit.widgets.connectiondisplay import ConnectionDisplay
 from profit.widgets.executionsdisplay import ExecutionsDisplay
@@ -20,9 +20,9 @@ from profit.widgets.tickerdisplay import TickerDisplay
 
 
 def tabWidgetMethod(cls):
-    def method(self, item):
+    def method(self, title):
         widget = cls(self.session, self)
-        index = self.addTab(widget, item.text(0))
+        index = self.addTab(widget, title)
         return index
     return method
 
@@ -48,7 +48,7 @@ class CentralTabs(QTabWidget):
         connect = self.connect
         connect(self, Signals.currentChanged, self.on_currentChanged)
         connect(window, Signals.sessionCreated, self.on_sessionCreated)
-        connect(window, Signals.itemDoubleClicked, self.on_itemClicked)
+        connect(window, Signals.modelDoubleClicked, self.on_itemClicked)
         connect(closeTabButton, Signals.clicked,
                 self.on_closeTabButton_clicked)
 
@@ -79,27 +79,27 @@ class CentralTabs(QTabWidget):
         connect(session, Signals.connectedTWS, self.on_statusTWS)
         connect(session, Signals.disconnectedTWS, self.on_statusTWS)
 
-    def on_itemClicked(self, item, col):
-        try:
-            self.on_symbolClicked(item=None, symbol=item.text(0),
-                                  tickerId=item.tickerId,
-                                  icon=item.icon(0))
-        except (AttributeError, ):
-            text = str(item.text(0))
+    def on_itemClicked(self, index): # item, col):
+        text = str(index.data().toString())
+        icon = QIcon(index.data(Qt.DecorationRole))
+        tickerId, tickerIdValid = index.data(tickerIdRole).toInt()
+        if tickerIdValid:
+            self.on_symbolClicked(
+                item=None, symbol=text, tickerId=tickerId, icon=icon)
+        else:
             try:
                 call = getattr(self, 'on_%sClicked' % text.lower())
-                index = call(item)
+                tabIndex = call(text)
             except (AttributeError, TypeError, ), exc:
                 print '## session item create exception:', exc
             else:
-                self.setCurrentIndex(index)
-                self.setTabIcon(index, item.icon(0))
+                self.setCurrentIndex(tabIndex)
+                self.setTabIcon(tabIndex, icon)
 
-    def on_connectionClicked(self, item):
+    def on_connectionClicked(self, text):
         try:
             index = self.connectionTabIndex
         except (AttributeError, ):
-            text = item.text(0)
             widget = ConnectionDisplay(self.session, self)
             index = self.connectionTabIndex = self.addTab(widget, text)
         return index
@@ -110,9 +110,9 @@ class CentralTabs(QTabWidget):
     on_ordersClicked = tabWidgetMethod(OrderDisplay)
     on_portfolioClicked = tabWidgetMethod(PortfolioDisplay)
 
-    def on_tickersClicked(self, item):
+    def on_tickersClicked(self, text):
         widget = TickerDisplay(self.session, self)
-        index = self.addTab(widget, item.text(0))
+        index = self.addTab(widget, text)
         self.connect(widget, Signals.tickerClicked, self.on_symbolClicked)
         return index
 
