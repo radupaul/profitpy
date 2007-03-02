@@ -124,6 +124,7 @@ class Session(QObject):
         self.filename = None
         self.nextId = None
         self.typedMessages = {}
+        self.bareMessages = []
         self.tickerCollection = tickerCollection = TickerCollection(self)
         self.connect(tickerCollection, Signals.createdTicker,
                      self, Signals.createdTicker)
@@ -212,6 +213,7 @@ class Session(QObject):
         typename = message.__class__.__name__
         typed = self.typedMessages.setdefault(typename, [])
         typed.append(current + (len(messages), ))
+        self.bareMessages.append(message)
         self.emit(SIGNAL(typename), message)
 
     def requestTickers(self):

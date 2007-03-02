@@ -97,27 +97,7 @@ class ExecutionsTableModel(QAbstractTableModel):
         @param message ExecDetails message instance
         @return None
         """
-        messages = self.messages
-        if 0:
-            last = len(messages)
-            objs = [mobj for mtime, mobj in messages[-64:last]]
-            idxs = range(last, last-64, -1)
-            try:
-                idx = objs.index(message)
-            except (ValueError, ):
-                pass
-            else:
-                self.messageIndexes.append(idxs[idx])
-            return
-        idx = len(messages) - 1
-        c = 0
-        while idx and c < 100:
-            mtime, msg = messages[idx]
-            if message is msg:
-                break
-            c += 1
-            idx -= 1
-        self.messageIndexes.append(idx)
+        self.messageIndexes.append(self.session.bareMessages.index(message))
         self.emit(Signals.layoutChanged)
 
     def data(self, index, role):

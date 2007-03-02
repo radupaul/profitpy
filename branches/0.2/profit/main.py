@@ -22,7 +22,7 @@
 #    send connection closed signal to connection display
 #    add zooms to plots
 #    reset plot scale and/or axis on curve enable/disable
-#    add systray icon
+#    fix systray icon
 
 from functools import partial
 from os import P_NOWAIT, getpgrp, killpg, popen, spawnvp
@@ -30,8 +30,9 @@ from signal import SIGQUIT
 from sys import argv
 
 from PyQt4.QtCore import Qt, pyqtSignature
-from PyQt4.QtGui import QApplication, QFrame, QMainWindow
-from PyQt4.QtGui import QFileDialog, QMessageBox, QProgressDialog
+from PyQt4.QtGui import QApplication, QFrame, QMainWindow, QSystemTrayIcon
+from PyQt4.QtGui import QFileDialog, QMessageBox, QProgressDialog, QMenu
+from PyQt4.QtGui import QIcon
 
 from profit.lib import Signals, Settings, nogc
 from profit.session import Session
@@ -53,6 +54,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.setupUi(self)
         self.setupLeftDock()
         self.setupBottomDock()
+        self.setupTrayIcon()
         self.createSession()
         self.readSettings()
         if len(argv) > 1:
@@ -73,6 +75,16 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.shellDock = Dock('Shell', self, makeShell, area)
         self.tabifyDockWidget(self.shellDock, self.stdoutDock)
         self.tabifyDockWidget(self.stdoutDock, self.stderrDock)
+
+    def setupTrayIcon(self):
+        self.trayIcon = trayIcon = QSystemTrayIcon(self)
+        self.trayMenu = trayMenu = QMenu()
+        trayIcon.setIcon(QIcon(":/images/icons/run.png"))
+        trayMenu.setTitle('Profit Device') # get from app
+        trayMenu.addSeparator()
+        trayMenu.addMenu(self.menuFile)
+        trayIcon.setContextMenu(trayMenu)
+        trayIcon.show()
 
     def setWindowTitle(self, text):
         text = '%s 0.2 (alpha) (r %s)' % (text, svn_revision())
