@@ -6,8 +6,8 @@
 # Author: Troy Melhase <troy@gci.net>
 
 from PyQt4.QtCore import QVariant
-from PyQt4.QtGui import (QApplication, QIcon, QStandardItem,
-                         QStandardItemModel, QWidget)
+from PyQt4.QtGui import (QApplication, QFrame, QIcon,
+                         QStandardItem, QStandardItemModel)
 
 from profit.lib import Signals, tickerIdRole
 from profit.widgets.ui_sessiontree import Ui_SessionTree
@@ -97,7 +97,7 @@ class SessionTreeModel(QStandardItemModel):
                 item.appendRow(subitem)
 
 
-class SessionTree(QWidget, Ui_SessionTree):
+class SessionTree(QFrame, Ui_SessionTree):
     """ Tree view of a Session object.
 
     """
@@ -106,7 +106,7 @@ class SessionTree(QWidget, Ui_SessionTree):
 
         @param parent ancestor of this widget
         """
-        QWidget.__init__(self, parent)
+        QFrame.__init__(self, parent)
         self.setupUi(self)
         connect = self.connect
         tree = self.treeView

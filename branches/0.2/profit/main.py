@@ -12,13 +12,17 @@
 #    add config dialog and session builder class setting
 #    add prompts to close/quit if connected
 #    add setting saves for message colors
-#    add clear/append option to load session (on existing messages)
-#    modify account display to use model/table view
+#    change "open" to "import"; provide actual "open" via
+#        new window (if existing window has session messages)
 #    modify orders display to use model/tree view
 #    add check and read of startup .py script
 #    write session collector script
 #    create better defaults for plot colors
 #    store plot colors by symbol, series, and index
+#    send connection closed signal to connection display
+#    add zooms to plots
+#    reset plot scale and/or axis on curve enable/disable
+#    add systray icon
 
 from functools import partial
 from os import P_NOWAIT, getpgrp, killpg, popen, spawnvp

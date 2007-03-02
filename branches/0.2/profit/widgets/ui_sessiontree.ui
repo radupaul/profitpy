@@ -1,6 +1,6 @@
 <ui version="4.0" >
  <class>SessionTree</class>
- <widget class="QWidget" name="SessionTree" >
+ <widget class="QFrame" name="SessionTree" >
   <property name="geometry" >
    <rect>
     <x>0</x>
@@ -14,20 +14,13 @@
   </property>
   <layout class="QVBoxLayout" >
    <property name="margin" >
-    <number>0</number>
+    <number>9</number>
    </property>
    <property name="spacing" >
-    <number>0</number>
+    <number>6</number>
    </property>
    <item>
-    <widget class="QTreeView" name="treeView" >
-     <property name="frameShape" >
-      <enum>QFrame::NoFrame</enum>
-     </property>
-     <property name="frameShadow" >
-      <enum>QFrame::Plain</enum>
-     </property>
-    </widget>
+    <widget class="QTreeView" name="treeView" />
    </item>
   </layout>
  </widget>

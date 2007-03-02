@@ -28,7 +28,7 @@
       <property name="orientation" >
        <enum>Qt::Horizontal</enum>
       </property>
-      <widget class="LocalTable" name="accountValuesTable" >
+      <widget class="QTableView" name="accountValuesTable" >
        <property name="alternatingRowColors" >
         <bool>true</bool>
        </property>
@@ -41,31 +41,6 @@
        <property name="gridStyle" >
         <enum>Qt::DotLine</enum>
        </property>
-       <column>
-        <property name="text" >
-         <string>Item</string>
-        </property>
-       </column>
-       <column>
-        <property name="text" >
-         <string>Value</string>
-        </property>
-       </column>
-       <column>
-        <property name="text" >
-         <string>Currency</string>
-        </property>
-       </column>
-       <column>
-        <property name="text" >
-         <string>Account</string>
-        </property>
-       </column>
-       <column>
-        <property name="text" >
-         <string>Plot</string>
-        </property>
-       </column>
       </widget>
       <widget class="QFrame" name="plotFrame" >
        <property name="frameShape" >

@@ -73,18 +73,22 @@ class TickerCollection(QObject):
         return Ticker()
 
     def on_session_TickPrice_TickSize(self, message):
+        tickerId = message.tickerId
+        field = message.field
         try:
-            tickerdata = self.tickers[message.tickerId]
+            tickerdata = self.tickers[tickerId]
         except (KeyError, ):
-            tickerdata = self.tickers[message.tickerId] = self.newTicker()
+            tickerdata = self.tickers[tickerId] = self.newTicker()
+            self.emit(Signals.createdTicker, tickerId, tickerdata)
         try:
             value = message.price
         except (AttributeError, ):
             value = message.size
         try:
-            seq = tickerdata.series[message.field]
+            seq = tickerdata.series[field]
         except (KeyError, ):
-            seq = tickerdata.series[message.field] = Series()
+            seq = tickerdata.series[field] = Series()
+            self.emit(Signals.createdSeries, tickerId, field)
         seq.append(value)
 
 
@@ -116,10 +120,15 @@ class Session(QObject):
         self.builder = builder if builder else SessionBuilder()
         self.connection = None
         self.messages = []
-        self.savepoint = 0 # len messages
+        self.savedLength = 0
         self.filename = None
-        self.nextid = None
-        self.tickerCollection = TickerCollection(self)
+        self.nextId = None
+        self.typedMessages = {}
+        self.tickerCollection = tickerCollection = TickerCollection(self)
+        self.connect(tickerCollection, Signals.createdTicker,
+                     self, Signals.createdTicker)
+        self.connect(tickerCollection, Signals.createdSeries,
+                     self, Signals.createdSeries)
 
     def items(self):
         return [
@@ -144,7 +153,7 @@ class Session(QObject):
 
     @property
     def isModified(self):
-        return len(self.messages) != self.savepoint
+        return len(self.messages) != self.savedLength
 
     def register(self, obj, name, other=None):
         if other is None:
@@ -194,11 +203,16 @@ class Session(QObject):
         self.emit(Signals.connectedTWS)
 
     def on_nextValidId(self, message):
-        self.nextid = int(message.orderId)
+        self.nextId = int(message.orderId)
 
     def receiveMessage(self, message, timefunc=time):
-        self.messages.append((timefunc(), message))
-        self.emit(SIGNAL(message.__class__.__name__), message)
+        messages = self.messages
+        current = (timefunc(), message)
+        messages.append(current)
+        typename = message.__class__.__name__
+        typed = self.typedMessages.setdefault(typename, [])
+        typed.append(current + (len(messages), ))
+        self.emit(SIGNAL(typename), message)
 
     def requestTickers(self):
         connection = self.connection
@@ -222,7 +236,7 @@ class Session(QObject):
         return
 
     def testContract(self, symbol='AAPL'):
-        orderid = self.nextid
+        orderid = self.nextId
 
         if orderid is None:
             return False
@@ -235,7 +249,7 @@ class Session(QObject):
         order.m_lmtPrice = contract.m_auxPrice = 78.5
         order.m_openClose = 'O'
         self.connection.placeOrder(orderid, contract, order)
-        self.nextid += 1
+        self.nextId += 1
         return True
 
     def save(self):
@@ -249,7 +263,7 @@ class Session(QObject):
             messages = self.messages[0:last]
             try:
                 dump(messages, handle, protocol=-1)
-                self.savepoint = last
+                self.savedLength = last
                 status = True
             except (PicklingError, ):
                 pass
@@ -284,6 +298,6 @@ class Session(QObject):
                 pass
             finally:
                 self.filename = filename
-                self.savepoint = len(messages)
+                self.savedLength = len(messages)
                 handle.close()
 

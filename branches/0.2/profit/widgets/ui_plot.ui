@@ -24,7 +24,7 @@
      <property name="orientation" >
       <enum>Qt::Horizontal</enum>
      </property>
-     <widget class="QTreeWidget" name="controlTree" >
+     <widget class="QTreeView" name="controlTree" >
       <property name="alternatingRowColors" >
        <bool>true</bool>
       </property>
@@ -37,14 +37,6 @@
       <property name="allColumnsShowFocus" >
        <bool>true</bool>
       </property>
-      <property name="columnCount" >
-       <number>1</number>
-      </property>
-      <column>
-       <property name="text" >
-        <string>Item</string>
-       </property>
-      </column>
      </widget>
      <widget class="QwtPlot" name="plotWidget" >
       <property name="sizePolicy" >

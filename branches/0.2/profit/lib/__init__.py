@@ -15,17 +15,23 @@ class Signals:
     """
     clicked = SIGNAL('clicked()')
     connectedTWS = SIGNAL('connectedTWS')
+    createdSeries = SIGNAL('createdSeries')
+    createdTicker = SIGNAL('createdTicker')
     currentChanged = SIGNAL('currentChanged(int)')
+    dataChanged = \
+        SIGNAL('dataChanged(const QModelIndex &, const QModelIndex &)')
     disconnectedTWS = SIGNAL('disconnectedTWS')
-    itemDoubleClicked = SIGNAL('itemDoubleClicked(QTreeWidgetItem *,int)')
-    modelDoubleClicked = SIGNAL('doubleClicked (const QModelIndex &)')
+    itemDoubleClicked = SIGNAL('itemDoubleClicked(QTreeWidgetItem *, int)')
     lastWindowClosed = SIGNAL('lastWindowClosed()')
     layoutChanged = SIGNAL('layoutChanged()')
+    modelDoubleClicked = SIGNAL('doubleClicked (const QModelIndex &)')
+    modelReset = SIGNAL('modelReset()')
     sessionCreated = SIGNAL('sessionCreated(PyQt_PyObject)')
+    splitterMoved = SIGNAL('splitterMoved(int, int)')
+    standardItemChanged = SIGNAL('itemChanged(QStandardItem *)')
+    tickerClicked = SIGNAL('tickerClicked')
     timeout = SIGNAL('timeout()')
     triggered = SIGNAL('triggered()')
-    splitterMoved = SIGNAL('splitterMoved(int, int)')
-    tickerClicked = SIGNAL('tickerClicked')
 
 
 class Slots:
